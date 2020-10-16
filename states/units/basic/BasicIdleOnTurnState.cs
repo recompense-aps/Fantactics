@@ -35,14 +35,8 @@ public class BasicIdleOnTurnState : State
         SlaveAs<Unit>().HoverEffect(false);
     }
 
-    private async void OnClicked()
+    private void OnClicked()
     {
-        Timer t = new Timer();
-        t.Autostart = true;
-        t.WaitTime = 1;
-        AddChild(t);
-        await ToSignal(t, "timeout");
-        t.QueueFree();
         Manager.Change<BasicSelectedState>();
     }
 }

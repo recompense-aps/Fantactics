@@ -4,6 +4,7 @@ using System;
 public class Global : Node
 {
     public static Global Instance{get; private set;}
+    public static Map ActiveMap{get; set;}
     public static void Log(object message)
     {
         GD.Print(message);

@@ -17,7 +17,7 @@ public class StateManager : Node
     {
         if(!AllowSameChange && Current is T)
         {
-            // don't allow changing to the current state
+            Global.Error("Unable to change to same state");
             return;
         }
 
@@ -29,7 +29,10 @@ public class StateManager : Node
         }
         else
         {
-            Current.Connect("tree_exited", this, nameof(ChangeTo), new Godot.Collections.Array(){ state });
+            if(!Current.IsConnected("tree_exited", this, nameof(ChangeTo)))
+            {
+                Current.Connect("tree_exited", this, nameof(ChangeTo), new Godot.Collections.Array(){ state });
+            }
             Current.QueueFree();
         }
     }
