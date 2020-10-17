@@ -4,6 +4,7 @@
 [ext_resource path="res://Map.tscn" type="PackedScene" id=2]
 [ext_resource path="res://units/undead/Abaddon.tscn" type="PackedScene" id=3]
 [ext_resource path="res://units/undead/PriestOfTheDamned.tscn" type="PackedScene" id=4]
+[ext_resource path="res://units/wizards/Pupil.tscn" type="PackedScene" id=4]
 
 [node name="MainScene" type="Node2D"]
 
@@ -22,3 +23,4 @@ position = Vector2( 478.77, 217.966 )
 
 [node name="PriestOfTheDamned" parent="." instance=ExtResource( 4 )]
 position = Vector2( 171.349, 289.782 )
+[node name="Pupil" parent="." instance=ExtResource( 4 )]

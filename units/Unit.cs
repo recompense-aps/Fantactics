@@ -71,7 +71,6 @@ public class Unit : Area2D
         t2.InterpolateProperty(this, "position", new Vector2(point.x, Position.y), new Vector2(point.x, point.y), 0.25f, Tween.TransitionType.Linear, Tween.EaseType.InOut, 0.26f);
         t.Start();
         t2.Start();
-
         GameBoardPosition = Global.ActiveMap.GetCellAt(Global.ActiveMap.GetBoardPositionFromWorldPosition(point));
         t2.Connect("tween_completed", this, nameof(OnMoveTweenFinished));
     }
