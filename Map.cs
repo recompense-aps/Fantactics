@@ -6,10 +6,11 @@ using System.Linq;
 public class Map : Node2D
 {
     public GameTile ActiveTile {get; private set;}
-    TileMap environmentMap;
-    TileMap highlightMap;
-    Label debugLabel;
-    Vector2 halfCell = new Vector2(32,32);
+    private TileMap environmentMap;
+    private TileMap highlightMap;
+    private Label debugLabel;
+    private Vector2 halfCell = new Vector2(32,32);
+    
     public override void _Ready()
     {
         environmentMap = GetNode<TileMap>("EnvironmentMap");
@@ -52,17 +53,16 @@ public class Map : Node2D
         return new GameTile(GetWorldPositionFromCell(gameBoardPosition), gameBoardPosition, name);
     }
 
-    public bool CellHasUnit(Vector2 cell)
+    public bool CellHasUnit(Vector2 gameBoardPosition)
     {
         IEnumerable<Unit> units = GetTree().GetNodesInGroup("units").Cast<Unit>();
 
         IEnumerable<Unit> q = 
             from    unit in units
             where   unit.GameBoardPosition != null && 
-                    unit.GameBoardPosition.IsSameTile(GetCellAt(cell))
+                    unit.GameBoardPosition.IsSameTile(GetCellAt(gameBoardPosition))
             select  unit;
 
-        Global.Log(q.Count());
         return q.Count() != 0;
     }
 

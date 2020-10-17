@@ -250,8 +250,8 @@ tile_set = SubResource( 2 )
 format = 1
 
 [node name="TextureRect" type="TextureRect" parent="."]
-margin_right = 1149.0
-margin_bottom = 709.0
+margin_right = 1027.0
+margin_bottom = 643.0
 mouse_filter = 2
 texture = ExtResource( 2 )
 expand = true
