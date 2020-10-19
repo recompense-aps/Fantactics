@@ -1,6 +1,6 @@
 using Godot;
 using System;
 
-public class BasicMovingState : State
+public class BasicMovingState : State<Unit>
 {
 }

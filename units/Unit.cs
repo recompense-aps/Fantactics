@@ -21,13 +21,13 @@ public class Unit : Area2D
     public Controller UnitController{get; set;}
     public GameTile GameBoardPosition{get; private set;}
     
-    protected StateManager State {get; private set;}
+    public StateManager<Unit> State {get; private set;}
 
     private bool wasPressed = false;
 
     public override void _Ready()
     {
-        State = new StateManager();
+        State = new StateManager<Unit>();
         AddChild(State);
         Connect("input_event", this, nameof(OnInputEvent));
         SetStats();
@@ -52,6 +52,11 @@ public class Unit : Area2D
     {
         return UnitController == null ||                    // Just for prototype testing
                otherUnit.UnitController == UnitController;
+    }
+
+    public bool CanMoveTo(Vector2 gameBoardPosition)
+    {
+        return gameBoardPosition.BoardDistance(GameBoardPosition.BoardPosition) <= Speed;
     }
 
     public virtual void HoverEffect(bool toggle)

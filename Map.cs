@@ -53,6 +53,36 @@ public class Map : Node2D
         return new GameTile(GetWorldPositionFromCell(gameBoardPosition), gameBoardPosition, name);
     }
 
+    public List<GameTile> GetTilesAt(Vector2 gameBoardPosition, int distance)
+    {
+        List<GameTile> tiles = new List<GameTile>();
+        List<Vector2> tranforms = new List<Vector2>(){ new Vector2(1,1), new Vector2(-1,1), new Vector2(1,-1), new Vector2(-1,-1) };
+        for(int x = 0; x <= distance; x++)
+        {
+            for(int y = 0; y <= distance && x + y <= distance; y++)
+            {
+                if(x == 0 && y == 0) continue;
+                tranforms.ForEach(v => 
+                {
+                    Vector2 position = gameBoardPosition + ( new Vector2(x,y) * v );
+                    Vector2 worldPos = environmentMap.MapToWorld(position);
+                    int cell = environmentMap.GetCell((int)position.x, (int)position.y);
+                    string name = environmentMap.TileSet.TileGetName(cell);
+
+                    tiles.Add(new GameTile(worldPos + halfCell, position, name));
+                });
+            }
+        }
+
+
+        return tiles;
+    }
+
+    public CellHighlight GetHighlightAt(Vector2 gameBoardPosition)
+    {
+        return (CellHighlight)highlightMap.GetCell((int)gameBoardPosition.x, (int)gameBoardPosition.y);
+    }
+
     public bool CellHasUnit(Vector2 gameBoardPosition)
     {
         IEnumerable<Unit> units = GetTree().GetNodesInGroup("units").Cast<Unit>();
@@ -66,6 +96,15 @@ public class Map : Node2D
         return q.Count() != 0;
     }
 
+    public IEnumerable<Unit> GetUnitsInArea(Vector2 gameBoardPosition, int distance)
+    {
+        return 
+            from    unit in GetTree().GetNodesInGroup("units").Cast<Unit>()
+            where   unit.GameBoardPosition.BoardPosition.BoardDistance(gameBoardPosition) <= distance &&
+                    unit.GameBoardPosition.BoardPosition != gameBoardPosition
+            select  unit;
+    }
+
     public void HighlightTiles(Vector2 origin, int distance, CellHighlight highlight)
     {
         origin = environmentMap.WorldToMap(origin);
@@ -73,12 +112,19 @@ public class Map : Node2D
         {
             for(int y = 0; y <= distance && x + y <= distance; y++)
             {
+                if(x == 0 && y == 0) continue;
+
                 highlightMap.SetCell((int)origin.x + x, (int)origin.y + y, (int)highlight);
                 highlightMap.SetCell((int)origin.x - x, (int)origin.y + y, (int)highlight);
                 highlightMap.SetCell((int)origin.x + x, (int)origin.y - y, (int)highlight);
                 highlightMap.SetCell((int)origin.x - x, (int)origin.y - y, (int)highlight);
             }
         }
+    }
+
+    public void HighlightTile(Vector2 gameBoardPosition, CellHighlight highlight)
+    {
+        highlightMap.SetCell((int)gameBoardPosition.x, (int)gameBoardPosition.y, (int)highlight);
     }
 
     public void UnHighlight(CellHighlight highlight)
@@ -117,6 +163,19 @@ public class GameTile
         Name = name;
     }
 
+    public GameTile(Vector2 boardPosition)
+    {
+
+    }
+
+    public CellHighlight Highlight
+    {
+        get
+        {
+            return Global.ActiveMap.GetHighlightAt(BoardPosition);
+        }
+    }
+
     public bool IsWithin(GameTile otherTile, int distance)
     {
         return BoardPosition.DistanceTo(otherTile.BoardPosition) <= distance;
@@ -126,6 +185,7 @@ public class GameTile
     {
         return otherTile.BoardPosition == BoardPosition;
     }
+    
 }
 
 public enum CellHighlight {Green, Red, Yellow}

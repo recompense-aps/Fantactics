@@ -1,15 +1,7 @@
 using Godot;
 using System;
 
-/**
-*   A state for units when their controller has the turn and the unit
-*   has not moved yet this turn.
-*   
-*   Slave Mutations:
-*       MUTATES:    Modulate
-*       UN-MUTATES: Modulate 
-*/
-public class BasicIdleOnTurnState : State
+public class BasicIdleOnTurnState : State<Unit>
 {
     protected override void OnStateStarted()
     {

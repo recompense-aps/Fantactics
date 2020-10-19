@@ -9,9 +9,10 @@ public class Global : Node
     {
         GD.Print(message);
     }
-    public static void Error(object message)
+    public static Exception Error(object message)
     {
         GD.PrintErr(message);
+        return new Exception(message.ToString());
     }
     public override void _Ready()
     {

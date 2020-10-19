@@ -1,19 +1,21 @@
 using Godot;
-using System;
+using System.Collections.Generic;
 
-public class StateManager : Node
+public class StateManager<T> : Node where T:Node
 {
-    public State Current {get; private set;}
+    public State<T> Current {get; private set;}
     public bool AllowSameChange{get; set;} = true;
-    private Node slave;
+    private Dictionary<string,object> data = new Dictionary<string, object>();
+
+    private T slave;
 
     public override void _Ready()
     {
         Name = GetType().Name;
-        slave = GetParent();
+        slave = GetParent() as T;
     }
 
-    public void Change<T>() where T:State, new()
+    public void Change<U>() where U:State<T>, new()
     {
         if(!AllowSameChange && Current is T)
         {
@@ -21,7 +23,7 @@ public class StateManager : Node
             return;
         }
 
-        State state = new T();
+        State<T> state = new U();
 
         if(Current == null)
         {
@@ -37,10 +39,41 @@ public class StateManager : Node
         }
     }
 
-    private void ChangeTo(State state)
+    private void ChangeTo(State<T> state)
     {
         Current = state;
         Current.Master(slave, this);
         AddChild(Current);
+    }
+
+    public void Mutate(string prop, object value)
+    {
+        if(data.ContainsKey(prop))
+        {
+            data[prop] = value;
+        }
+        else
+        {
+            data.Add(prop, value);
+        }
+    }
+
+    public U Data<U>(string prop)
+    {
+        if(!data.ContainsKey(prop) || data[prop] == null)
+        {
+            Global.Error(string.Format("Cannot access property '{0}' property does not exist", prop));
+        }
+        
+        object value = data[prop];
+
+        if(value is U)
+        {
+            return (U)value;
+        }
+        else
+        {
+            throw Global.Error(string.Format("Unable to cast property '{0}' to type '{1}", prop, nameof(U)));
+        }
     }
 }

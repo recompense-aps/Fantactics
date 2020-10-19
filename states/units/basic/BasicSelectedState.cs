@@ -1,29 +1,43 @@
 using Godot;
+using System.Linq;
 using System;
 
-public class BasicSelectedState : State
+public class BasicSelectedState : State<Unit>
 {
-    private Unit unit;
     public override void _Ready()
     {
         base._Ready();
-        unit = SlaveAs<Unit>();
-        Global.ActiveMap.HighlightTiles(unit.Position, unit.Speed, CellHighlight.Green);
+        GetTree().GetNodesInGroup("units")
+                .Cast<Unit>()
+                .Where(u => u.GetInstanceId() != Slave.GetInstanceId())
+                .ToList()
+                .ForEach(u => u.State.Change<BasicIdleState>());
+
+        Global.ActiveMap.HighlightTiles(Slave.Position, Slave.Speed, CellHighlight.Green);
+        Global.ActiveMap.GetUnitsInArea(Slave.GameBoardPosition.BoardPosition, Slave.Speed + Slave.AttackRange)
+              .ToList()
+              .ForEach(unit => Global.ActiveMap.HighlightTile(unit.GameBoardPosition.BoardPosition, CellHighlight.Red));
     }
     public override void _Process(float delta)
     {
         if(Input.IsMouseButtonPressed((int)ButtonList.Left))
         {
-            if(Global.ActiveMap.ActiveTile.IsSameTile(unit.GameBoardPosition))
+            if(Global.ActiveMap.ActiveTile.IsSameTile(Slave.GameBoardPosition))
             {
                 return;
             }
 
             Global.ActiveMap.UnHighlight(CellHighlight.Green);
+            Global.ActiveMap.UnHighlight(CellHighlight.Red);
             
-            if(Global.ActiveMap.ActiveTile.IsWithin(unit.GameBoardPosition, unit.Speed) && !Global.ActiveMap.CellHasUnit(Global.ActiveMap.ActiveTile.BoardPosition))
+            if(Global.ActiveMap.ActiveTile.IsWithin(Slave.GameBoardPosition, Slave.Speed) && !Global.ActiveMap.CellHasUnit(Global.ActiveMap.ActiveTile.BoardPosition))
             {
-                MoveUnit();
+                MoveUnit(Global.ActiveMap.ActiveTile.WorldPosition, () => Manager.Change<BasicIdleOnTurnState>());
+            }
+            else if(Global.ActiveMap.CellHasUnit(Global.ActiveMap.ActiveTile.BoardPosition) && Global.ActiveMap.ActiveTile.IsWithin(Slave.GameBoardPosition, Slave.Speed + Slave.AttackRange))
+            {
+                Manager.Mutate("cellToAttack", Global.ActiveMap.ActiveTile);
+                Manager.Change<BasicAttackingState>();
             }
             else
             {
@@ -32,10 +46,8 @@ public class BasicSelectedState : State
         }
     }
 
-    private async void MoveUnit()
+    private void MoveUnit(Vector2 position, Action afterMove = null)
     {
-        unit.MoveTo(Global.ActiveMap.ActiveTile.WorldPosition);
-        await ToSignal(Slave, nameof(Unit.FinishedMoving));
-        Manager.Change<BasicIdleOnTurnState>();
+        Slave.MoveTo(position);
     }
 }

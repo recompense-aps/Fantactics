@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class BasicTakingDamageState : State
+public class BasicTakingDamageState : State<Unit>
 {
 
 }

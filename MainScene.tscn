@@ -1,26 +1,23 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://units/undead/Zombie.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Map.tscn" type="PackedScene" id=2]
 [ext_resource path="res://units/undead/Abaddon.tscn" type="PackedScene" id=3]
 [ext_resource path="res://units/undead/PriestOfTheDamned.tscn" type="PackedScene" id=4]
-[ext_resource path="res://units/wizards/Pupil.tscn" type="PackedScene" id=4]
+[ext_resource path="res://units/wizards/Pupil.tscn" type="PackedScene" id=5]
 
 [node name="MainScene" type="Node2D"]
 
 [node name="Map" parent="." instance=ExtResource( 2 )]
 
-[node name="Zombie" parent="." instance=ExtResource( 1 )]
-position = Vector2( 267.101, 146.921 )
-z_index = 100
-z_as_relative = false
-
-[node name="Zombie2" parent="." instance=ExtResource( 1 )]
-position = Vector2( 262.063, 404.434 )
-
 [node name="Abaddon" parent="." instance=ExtResource( 3 )]
 position = Vector2( 478.77, 217.966 )
 
 [node name="PriestOfTheDamned" parent="." instance=ExtResource( 4 )]
-position = Vector2( 171.349, 289.782 )
-[node name="Pupil" parent="." instance=ExtResource( 4 )]
+position = Vector2( 153.71, 267.103 )
+
+[node name="Pupil" parent="." instance=ExtResource( 5 )]
+position = Vector2( 267.103, 171.349 )
+
+[node name="Zombie" parent="." instance=ExtResource( 1 )]
+position = Vector2( 322.54, 313.72 )

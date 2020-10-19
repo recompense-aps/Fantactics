@@ -1,10 +1,10 @@
 using Godot;
 using System;
 
-public abstract class State : Node
+public abstract class State<T> : Node where T:Node
 {
-    public Node Slave {get; private set;}
-    protected StateManager Manager{get; private set;}
+    public T Slave {get; private set;}
+    protected StateManager<T> Manager{get; private set;}
 
     public override void _Ready()
     {
@@ -18,15 +18,15 @@ public abstract class State : Node
         OnStateStarted();
     }
 
-    public void Master(Node slave, StateManager manager)
+    public void Master(T slave, StateManager<T> manager)
     {
         Slave = slave;
         Manager = manager;
     }
 
-    protected T SlaveAs<T>() where T:Node
+    protected U SlaveAs<U>() where U:Node
     {
-        return Slave as T;
+        return Slave as U;
     }
     protected virtual void OnStateFinished(){ Global.Log(string.Format("{0} finished '{1}' state", Slave.Name, GetType().Name)); }
     protected virtual void OnStateStarted(){ Global.Log(string.Format("{0} started '{1}' state", Slave.Name, GetType().Name)); }
