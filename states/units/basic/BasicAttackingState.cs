@@ -23,7 +23,7 @@ public class BasicAttackingState : State<Unit>
         // first, move into position
         if(tileToAttack.BoardPosition.BoardDistance(Slave.GameBoardPosition.BoardPosition) > Slave.AttackRange)
         {
-            Slave.MoveTo(attackPositionTile.WorldPosition);
+            Slave.MoveToAction(attackPositionTile.WorldPosition);
 
             // wait for movement to finish
             await ToSignal(Slave, nameof(Unit.FinishedMoving));
@@ -31,7 +31,7 @@ public class BasicAttackingState : State<Unit>
 
         // then, do the combat
         Unit otherUnit = Global.ActiveMap.GetUnitAt(tileToAttack.BoardPosition);
-        Slave.Fight(otherUnit);
+        Slave.FightAction(otherUnit);
 
         // wait for the combat to finish
         await ToSignal(Slave, nameof(Unit.FinishedFighting));

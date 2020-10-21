@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -17,7 +18,9 @@ public class Unit : Area2D
     [Signal]
     public delegate void FinishedFighting();
     [Signal]
-    public delegate void Died();
+    public delegate void StartedDying();
+    [Signal]
+    public delegate void FinishedDying();
 
     public int Attack{get; protected set;}          = 1;
     public int Defense{get; protected set;}         = 1;
@@ -25,10 +28,12 @@ public class Unit : Area2D
     public int Speed{get; protected set;}           = 2;
     public int AttackRange{get; protected set;}     = 1;
 
+    public string Guid{get; private set;}
     public Controller UnitController{get; set;}
     public GameTile GameBoardPosition{get; private set;}
     public StateManager<Unit> State {get; private set;}
     private HpDisplay hpDisplay;
+    private List<UnitAction> actions;
     public static List<Unit> All
     {
         get
@@ -57,12 +62,18 @@ public class Unit : Area2D
 
         hpDisplay.SetValue(Hp);
         AddToGroup("units");
+        AddChild(new Controller());
     }
 
     public void SetGamePosition(Vector2 position)
     {
         Position = Global.ActiveMap.GetWorldPositionFromCell(position);
         GameBoardPosition = Global.ActiveMap.GetCellAt(position);
+    }
+
+    public void SetController(Controller controller)
+    {
+        Guid = controller.Guid + "|" + GetInstanceId();
     }
 
     public bool HasSameController(Unit otherUnit)
@@ -76,13 +87,44 @@ public class Unit : Area2D
         return gameBoardPosition.BoardDistance(GameBoardPosition.BoardPosition) <= Speed;
     }
 
-    public virtual void HoverEffect(bool toggle)
+    public void RecordAction(UnitAction action)
     {
-        float alpha = toggle ? 0.5f : 1;
-        Modulate = new Color(1, 1, 1, alpha);
+        actions.Add(action);
     }
 
-    public virtual void MoveTo(Vector2 point)
+    public void RecordAction(string jsonAction){}
+
+    public SignalAwaiter ReplayAction(UnitAction action)
+    {
+        return action.Replay(this);
+    }
+
+    public void ReplayAllActions()
+    {
+        actions.ForEach(async action => await action.Replay(this));
+    }
+
+    public void FlushActions()
+    {
+        actions = new List<UnitAction>();
+    }
+
+    public void LoadActionsFromJson(List<string> actionsJson)
+    {
+        actionsJson.ForEach(RecordAction);
+    }
+
+    public string ExportActionsAsJson()
+    {
+        List<string> jsonActions = new List<string>();
+        actions.ForEach(action => jsonActions.Add(action.ToJson()));
+        return jsonActions.ToString();
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    //   Actions that the unit can do that are repeatable and recorded
+    ////////////////////////////////////////////////////////////////////
+    public async virtual void MoveToAction(Vector2 point)
     {
         EmitSignal(nameof(StartedMoving));
         Tween t = new Tween();
@@ -94,10 +136,11 @@ public class Unit : Area2D
         t.Start();
         t2.Start();
         GameBoardPosition = Global.ActiveMap.GetCellAt(Global.ActiveMap.GetBoardPositionFromWorldPosition(point));
-        t2.Connect("tween_completed", this, nameof(OnMoveTweenFinished));
+        await ToSignal(t2, "tween_completed");
+        EmitSignal(nameof(FinishedMoving));
     }
 
-    public async virtual void Fight(Unit otherUnit)
+    public async virtual void FightAction(Unit otherUnit)
     {
         EmitSignal(nameof(StartedFighting));
 
@@ -127,8 +170,21 @@ public class Unit : Area2D
         // fighting done
         EmitSignal(nameof(FinishedFighting));
         t.QueueFree();
+        RecordAction(new FightAction(otherUnit));
     }
-
+    
+    public async virtual void DieAction()
+    {
+        EmitSignal(nameof(StartedDying));
+        await Kill();
+        EmitSignal(nameof(FinishedDying));
+        QueueFree();
+        RecordAction(new DieAction());
+    }
+    
+    ////////////////////////////////////////////////////////////////////
+    //  Other public virtual methods
+    ////////////////////////////////////////////////////////////////////
     public virtual SignalAwaiter ApplyCombatEffect(Unit otherUnit)
     {
         // default filler thing
@@ -154,7 +210,7 @@ public class Unit : Area2D
         hpDisplay.SetValue(Hp);
         if(Hp <= 0)
         {
-            Die();
+            DieAction();
         }
     }
 
@@ -167,11 +223,10 @@ public class Unit : Area2D
         return ToSignal(t, "tween_completed");
     }
 
-    public async virtual void Die()
+    public virtual void HoverEffect(bool toggle)
     {
-        await Kill();
-        EmitSignal(nameof(Died));
-        QueueFree();
+        float alpha = toggle ? 0.5f : 1;
+        Modulate = new Color(1, 1, 1, alpha);
     }
 
     protected virtual void SetStats(){}
@@ -194,9 +249,64 @@ public class Unit : Area2D
             }
         }
     }
+}
 
-    private void OnMoveTweenFinished(Godot.Object @object, NodePath key)
+public abstract class UnitAction
+{
+    public abstract SignalAwaiter Replay(Unit unit);
+
+    public abstract string ToJson();
+
+    public static UnitAction FromJson()
     {
-        EmitSignal(nameof(FinishedMoving));
+
     }
+}
+
+public class MoveAction : UnitAction
+{
+    public Vector2 WorldDestination {get; private set;}
+    public MoveAction(Vector2 worldDestination)
+    {
+        WorldDestination = worldDestination;
+    }
+
+    public override SignalAwaiter Replay(Unit unit)
+    {
+        unit.MoveToAction(WorldDestination);
+
+        return unit.ToSignal(unit, nameof(Unit.FinishedMoving));
+    }
+
+    public override string ToJson(){return null;}
+}
+
+public class FightAction : UnitAction
+{
+    public Unit OtherUnit {get; private set;}
+
+    public FightAction(Unit otherUnit)
+    {
+        OtherUnit = otherUnit;
+    }
+
+    public override SignalAwaiter Replay(Unit unit)
+    {
+        unit.FightAction(OtherUnit);
+
+        return unit.ToSignal(unit, nameof(Unit.FinishedFighting));
+    }
+    
+    public override string ToJson(){return null;}
+}
+
+public class DieAction : UnitAction
+{
+    public override SignalAwaiter Replay(Unit unit)
+    {
+        unit.DieAction();
+
+        return unit.ToSignal(unit, nameof(Unit.FinishedDying));
+    }
+    public override string ToJson(){return null;}
 }

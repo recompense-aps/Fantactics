@@ -1,21 +1,37 @@
 using Godot;
-using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 
 public class Controller : Node
 {
-    // Declare member variables here. Examples:
-    // private int a = 2;
-    // private string b = "text";
-
-    // Called when the node enters the scene tree for the first time.
+    public string Guid {get; protected set;}
+    public List<Unit> Units
+    {
+        get
+        {
+            return Unit.All
+                       .Where(unit => unit.UnitController == this)
+                       .ToList();
+        }
+    }
     public override void _Ready()
     {
-        
+        Guid = OS.GetUniqueId();
     }
 
-//  // Called every frame. 'delta' is the elapsed time since the previous frame.
-//  public override void _Process(float delta)
-//  {
-//      
-//  }
+    protected string ExportUnitActionsJson()
+    {
+        StringBuilder builder = new StringBuilder();
+        Units.ForEach(unit => {
+            builder.Append(unit.ExportActionsAsJson());
+            unit.FlushActions();
+        });
+        return builder.ToString();
+    }
+
+    protected async virtual void SendData()
+    {
+        HttpResponse data = await Global.Http.Request("http://google.com");
+    }
 }

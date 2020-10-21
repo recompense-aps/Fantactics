@@ -47,7 +47,7 @@ public class BasicSelectedState : State<Unit>
 
     private async void MoveUnit(Vector2 position, Action afterMove = null)
     {
-        Slave.MoveTo(position);
+        Slave.MoveToAction(position);
 
         await ToSignal(Slave, nameof(Unit.FinishedMoving));
 
