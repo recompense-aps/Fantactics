@@ -13,5 +13,6 @@ public class Abaddon : Unit
     protected override void SetStats()
     {
         Speed = 5;
+        Hp = 8;
     }
 }

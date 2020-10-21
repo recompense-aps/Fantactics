@@ -13,14 +13,37 @@ public class BasicAttackingState : State<Unit>
         tileToAttack = Manager.Data<GameTile>("tileToAttack");
 
         GameTile tileToMoveTo = Global.ActiveMap.GetTilesAt(tileToAttack.BoardPosition, 1)
-                        .Where(v => Slave.CanMoveTo(v.BoardPosition))
+                        .Where(v => Slave.CanMoveTo(v.BoardPosition) && Global.ActiveMap.GetUnitAt(v.BoardPosition) == null)
                         .First();
+        Attack(tileToMoveTo);
+    }
 
-        Slave.MoveTo(tileToMoveTo.WorldPosition);
-        PackedScene effect = GD.Load<PackedScene>("res://effects/ExplosionEffect.tscn");
-        Node2D effectNode = effect.Instance() as Node2D;
-        Global.Instance.AddChild(effectNode);
-        effectNode.GlobalPosition = Global.ActiveMap.ActiveTile.WorldPosition;
-        Manager.Change<BasicAttackingState>();
+    private async void Attack(GameTile attackPositionTile)
+    {
+        // first, move into position
+        if(tileToAttack.BoardPosition.BoardDistance(Slave.GameBoardPosition.BoardPosition) > Slave.AttackRange)
+        {
+            Slave.MoveTo(attackPositionTile.WorldPosition);
+
+            // wait for movement to finish
+            await ToSignal(Slave, nameof(Unit.FinishedMoving));
+        }
+
+        // then, do the combat
+        Unit otherUnit = Global.ActiveMap.GetUnitAt(tileToAttack.BoardPosition);
+        Slave.Fight(otherUnit);
+
+        // wait for the combat to finish
+        await ToSignal(Slave, nameof(Unit.FinishedFighting));
+        Global.Log("Finished fighting");
+
+        // done now, revert all units state
+        Unit.All
+            .Where(unit => unit.GetInstanceId() != Slave.GetInstanceId())
+            .ToList()
+            .ForEach(unit => unit.State.Revert());
+
+        // revert our attacking unit
+        Manager.Change<BasicIdleOnTurnState>();
     }
 }

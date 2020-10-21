@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 
 public class StateManager<T> : Node where T:Node
@@ -6,6 +7,7 @@ public class StateManager<T> : Node where T:Node
     public State<T> Current {get; private set;}
     public bool AllowSameChange{get; set;} = true;
     private Dictionary<string,object> data = new Dictionary<string, object>();
+    private Stack<Type> history = new Stack<Type>();
 
     private T slave;
 
@@ -25,21 +27,42 @@ public class StateManager<T> : Node where T:Node
 
         State<T> state = new U();
 
-        if(Current == null)
+        ChangeTo(state);
+    }
+
+    public void Revert()
+    {
+        if(history.Count > 0)
         {
-            ChangeTo(state);
-        }
-        else
-        {
-            if(!Current.IsConnected("tree_exited", this, nameof(ChangeTo)))
+            State<T> last = Activator.CreateInstance(history.Pop()) as State<T>;
+
+            if(last == null)
             {
-                Current.Connect("tree_exited", this, nameof(ChangeTo), new Godot.Collections.Array(){ state });
+                throw Global.Error("Unable to revert state!!!");
             }
-            Current.QueueFree();
+
+            ChangeTo(last);
         }
     }
 
-    private void ChangeTo(State<T> state)
+    private async void ChangeTo(State<T> state)
+    {
+        if(Current == null)
+        {
+            AddNewState(state);
+        }
+        else
+        {
+            history.Push(Current.GetType());
+            Current.QueueFree();
+
+            await ToSignal(Current, "tree_exited");
+
+            AddNewState(state);
+        }
+    }
+
+    private void AddNewState(State<T> state)
     {
         Current = state;
         Current.Master(slave, this);
@@ -62,7 +85,7 @@ public class StateManager<T> : Node where T:Node
     {
         if(!data.ContainsKey(prop) || data[prop] == null)
         {
-            Global.Error(string.Format("Cannot access property '{0}' property does not exist", prop));
+            throw Global.Error(string.Format("Cannot access property '{0}' property does not exist", prop));
         }
         
         object value = data[prop];

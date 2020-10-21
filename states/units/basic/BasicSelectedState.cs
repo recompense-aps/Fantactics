@@ -4,20 +4,20 @@ using System;
 
 public class BasicSelectedState : State<Unit>
 {
-    public override void _Ready()
+    protected override void OnStateStarted()
     {
-        base._Ready();
-        GetTree().GetNodesInGroup("units")
-                .Cast<Unit>()
-                .Where(u => u.GetInstanceId() != Slave.GetInstanceId())
-                .ToList()
-                .ForEach(u => u.State.Change<BasicIdleState>());
+        base.OnStateStarted();
+        Unit.All
+            .Where(u => u.GetInstanceId() != Slave.GetInstanceId())
+            .ToList()
+            .ForEach(u => u.State.Change<BasicIdleState>());
 
         Global.ActiveMap.HighlightTiles(Slave.Position, Slave.Speed, CellHighlight.Green);
         Global.ActiveMap.GetUnitsInArea(Slave.GameBoardPosition.BoardPosition, Slave.Speed + Slave.AttackRange)
               .ToList()
               .ForEach(unit => Global.ActiveMap.HighlightTile(unit.GameBoardPosition.BoardPosition, CellHighlight.Red));
     }
+
     public override void _Process(float delta)
     {
         if(Input.IsMouseButtonPressed((int)ButtonList.Left))
@@ -32,22 +32,37 @@ public class BasicSelectedState : State<Unit>
             
             if(Global.ActiveMap.ActiveTile.IsWithin(Slave.GameBoardPosition, Slave.Speed) && !Global.ActiveMap.CellHasUnit(Global.ActiveMap.ActiveTile.BoardPosition))
             {
-                MoveUnit(Global.ActiveMap.ActiveTile.WorldPosition, () => Manager.Change<BasicIdleOnTurnState>());
+                MoveUnit(Global.ActiveMap.ActiveTile.WorldPosition);
             }
             else if(Global.ActiveMap.CellHasUnit(Global.ActiveMap.ActiveTile.BoardPosition) && Global.ActiveMap.ActiveTile.IsWithin(Slave.GameBoardPosition, Slave.Speed + Slave.AttackRange))
             {
-                Manager.Mutate("cellToAttack", Global.ActiveMap.ActiveTile);
-                Manager.Change<BasicAttackingState>();
+                Attack();
             }
             else
             {
-                Manager.Change<BasicIdleOnTurnState>();
+                Unit.All.ForEach(unit => unit.State.Revert());
             }
         }
     }
 
-    private void MoveUnit(Vector2 position, Action afterMove = null)
+    private async void MoveUnit(Vector2 position, Action afterMove = null)
     {
         Slave.MoveTo(position);
+
+        await ToSignal(Slave, nameof(Unit.FinishedMoving));
+
+        Unit.All
+            .Where(unit => unit.GetInstanceId() != Slave.GetInstanceId())
+            .ToList()
+            .ForEach(unit => unit.State.Revert());
+
+        // reset the slave
+        Manager.Change<BasicIdleOnTurnState>();
+    }
+
+    private void Attack()
+    {
+        Manager.Mutate("tileToAttack", Global.ActiveMap.ActiveTile);
+        Manager.Change<BasicAttackingState>();
     }
 }

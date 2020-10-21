@@ -105,6 +105,18 @@ public class Map : Node2D
             select  unit;
     }
 
+    public Unit GetUnitAt(Vector2 gameBoardPosition)
+    {
+        IEnumerable<Unit> units =  
+            from    unit in GetTree().GetNodesInGroup("units").Cast<Unit>()
+            where   unit.GameBoardPosition.BoardPosition == gameBoardPosition
+            select  unit;
+
+        if(units.Count() == 0) return null;
+
+        return units.First();
+    }
+
     public void HighlightTiles(Vector2 origin, int distance, CellHighlight highlight)
     {
         origin = environmentMap.WorldToMap(origin);
