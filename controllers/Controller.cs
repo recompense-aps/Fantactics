@@ -29,9 +29,4 @@ public class Controller : Node
         });
         return builder.ToString();
     }
-
-    protected async virtual void SendData()
-    {
-        HttpResponse data = await Global.Http.Request("http://google.com");
-    }
 }

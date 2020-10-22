@@ -21,15 +21,35 @@ public class Global : Node
     }
 }
 
-public class HttpRequestManager
+public class HttpRequestManager : Godot.Object
 {
-    public async Task<HttpResponse> Request(string url)
+    public async Task<HttpResponse> Request(string url, int timeout)
     {
         HTTPRequest request = new HTTPRequest();
         Global.Instance.AddChild(request);
-        request.Request(url);
+        Error e = request.Request(url);
+        MonitorRequestTimeout(request, timeout, url);
         object[] response = await request.ToSignal(request, "request_completed");
         return new HttpResponse(response, url);
+    }
+
+    private async void MonitorRequestTimeout(HTTPRequest request, int timeout, string url)
+    {
+        Timer t = new Timer();
+        t.WaitTime = timeout;
+        t.Autostart = true;
+        Global.Instance.AddChild(t);
+        await ToSignal(t, "timeout");
+        t.QueueFree();
+
+        if(request.GetHttpClientStatus() == HTTPClient.Status.Connecting      ||
+           request.GetHttpClientStatus() == HTTPClient.Status.ConnectionError ||
+           request.GetHttpClientStatus() == HTTPClient.Status.CantConnect)
+        {
+            // timed out, log the error
+            Global.Error(string.Format("Request to {0} timed out after {1} second(s)", url, timeout));
+            request.QueueFree();
+        }
     }
 }
 
@@ -40,6 +60,7 @@ public class HttpResponse
     public int ResponseCode {get; private set;}
     public string[] Headers {get; private set;}
     public byte[] RawResponse {get; private set;}
+    public string Body {get; private set;}
     public string Url {get; private set;}
     public HttpResponse(object[] rawData, string url)
     {
@@ -48,6 +69,8 @@ public class HttpResponse
         ResponseCode =  (int)       data[1];
         Headers =       (string[])  data[2];
         RawResponse =   (byte[])    data[3];
+        Url = url;
+        Body = System.Text.Encoding.UTF8.GetString(RawResponse);
     }
 
     public override string ToString()
@@ -55,14 +78,21 @@ public class HttpResponse
         return string.Format(@"
             [HTTP REQUEST TO]
             {0}
+
             [RESULT]
             {1}
+
             [RESPONSE CODE]
             {2}
+
             [HEADERS]
             {3}
-            [RAW RESPONSE]
+
+            [BODY]
             {4}
-        ", Url, Result, ResponseCode, Headers, RawResponse);
+
+            [RAW RESPONSE]
+            {5}
+        ", Url, Result, ResponseCode, string.Join(";\n\t\t", Headers), Body, string.Join(" ", RawResponse));
     }
 }

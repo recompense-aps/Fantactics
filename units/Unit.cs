@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -33,7 +32,7 @@ public class Unit : Area2D
     public GameTile GameBoardPosition{get; private set;}
     public StateManager<Unit> State {get; private set;}
     private HpDisplay hpDisplay;
-    private List<UnitAction> actions;
+    private List<UnitAction> actions = new List<UnitAction>();
     public static List<Unit> All
     {
         get
@@ -42,10 +41,16 @@ public class Unit : Area2D
         }
     }
 
+    public static Unit FromGuid(string guid)
+    {
+        return All.Where(unit => unit.Guid == guid).FirstOrDefault();
+    }
+
     private bool wasPressed = false;
 
     public override void _Ready()
     {
+        Guid = GetInstanceId().ToString();
         State = new StateManager<Unit>();
         hpDisplay = HpDisplay.Scene.Instance();
         AddChild(State);
@@ -62,7 +67,6 @@ public class Unit : Area2D
 
         hpDisplay.SetValue(Hp);
         AddToGroup("units");
-        AddChild(new Controller());
     }
 
     public void SetGamePosition(Vector2 position)
@@ -90,18 +94,19 @@ public class Unit : Area2D
     public void RecordAction(UnitAction action)
     {
         actions.Add(action);
+        Global.Log(ExportActionsAsJson());
     }
 
     public void RecordAction(string jsonAction){}
 
     public SignalAwaiter ReplayAction(UnitAction action)
     {
-        return action.Replay(this);
+        return action.Replay();
     }
 
     public void ReplayAllActions()
     {
-        actions.ForEach(async action => await action.Replay(this));
+        actions.ForEach(async action => await action.Replay());
     }
 
     public void FlushActions()
@@ -118,7 +123,7 @@ public class Unit : Area2D
     {
         List<string> jsonActions = new List<string>();
         actions.ForEach(action => jsonActions.Add(action.ToJson()));
-        return jsonActions.ToString();
+        return "[" + string.Join(",", jsonActions) + "]";
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -138,6 +143,7 @@ public class Unit : Area2D
         GameBoardPosition = Global.ActiveMap.GetCellAt(Global.ActiveMap.GetBoardPositionFromWorldPosition(point));
         await ToSignal(t2, "tween_completed");
         EmitSignal(nameof(FinishedMoving));
+        RecordAction(new MoveAction(this, point));
     }
 
     public async virtual void FightAction(Unit otherUnit)
@@ -170,16 +176,16 @@ public class Unit : Area2D
         // fighting done
         EmitSignal(nameof(FinishedFighting));
         t.QueueFree();
-        RecordAction(new FightAction(otherUnit));
+        RecordAction(new FightAction(this, otherUnit));
     }
     
     public async virtual void DieAction()
     {
+        RecordAction(new DieAction(this));
         EmitSignal(nameof(StartedDying));
         await Kill();
         EmitSignal(nameof(FinishedDying));
         QueueFree();
-        RecordAction(new DieAction());
     }
     
     ////////////////////////////////////////////////////////////////////
@@ -251,62 +257,65 @@ public class Unit : Area2D
     }
 }
 
-public abstract class UnitAction
+public abstract class UnitAction : Godot.Object
 {
-    public abstract SignalAwaiter Replay(Unit unit);
-
-    public abstract string ToJson();
-
-    public static UnitAction FromJson()
+    private string unitGuid;
+    protected Unit ActionUnit { get { return Unit.FromGuid(unitGuid); } }
+    protected Dictionary<string,object> serializationData = new Dictionary<string, object>();
+    public UnitAction(Unit unit)
     {
+        unitGuid = unit.Guid;
+        serializationData.Add("unitGuid", unitGuid);
+        serializationData.Add("type", GetType().Name);
+    }
+    public abstract SignalAwaiter Replay();
 
+    public virtual string ToJson()
+    {
+        return JSON.Print(serializationData);
     }
 }
 
 public class MoveAction : UnitAction
 {
     public Vector2 WorldDestination {get; private set;}
-    public MoveAction(Vector2 worldDestination)
+    public MoveAction(Unit unit, Vector2 worldDestination) : base(unit)
     {
         WorldDestination = worldDestination;
     }
 
-    public override SignalAwaiter Replay(Unit unit)
+    public override SignalAwaiter Replay()
     {
-        unit.MoveToAction(WorldDestination);
+        ActionUnit.MoveToAction(WorldDestination);
 
-        return unit.ToSignal(unit, nameof(Unit.FinishedMoving));
+        return ActionUnit.ToSignal(ActionUnit, nameof(Unit.FinishedMoving));
     }
-
-    public override string ToJson(){return null;}
 }
 
 public class FightAction : UnitAction
 {
-    public Unit OtherUnit {get; private set;}
+    public string OtherUnitGuid {get; private set;}
 
-    public FightAction(Unit otherUnit)
+    public FightAction(Unit unit, Unit otherUnit) : base(unit)
     {
-        OtherUnit = otherUnit;
+        OtherUnitGuid = otherUnit.Guid;
     }
 
-    public override SignalAwaiter Replay(Unit unit)
+    public override SignalAwaiter Replay()
     {
-        unit.FightAction(OtherUnit);
+        ActionUnit.FightAction(Unit.FromGuid(OtherUnitGuid));
 
-        return unit.ToSignal(unit, nameof(Unit.FinishedFighting));
+        return ActionUnit.ToSignal(ActionUnit, nameof(Unit.FinishedFighting));
     }
-    
-    public override string ToJson(){return null;}
 }
 
 public class DieAction : UnitAction
 {
-    public override SignalAwaiter Replay(Unit unit)
+    public DieAction(Unit unit) : base(unit){}
+    public override SignalAwaiter Replay()
     {
-        unit.DieAction();
+        ActionUnit.DieAction();
 
-        return unit.ToSignal(unit, nameof(Unit.FinishedDying));
+        return ActionUnit.ToSignal(ActionUnit, nameof(Unit.FinishedDying));
     }
-    public override string ToJson(){return null;}
 }
