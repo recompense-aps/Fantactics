@@ -17,13 +17,6 @@ public class Map : Node2D
         highlightMap = GetNode<TileMap>("HighlightMap");
         debugLabel = GetNode<Label>("Debug/DebugText");
         Global.ActiveMap = this;
-
-        Tester();
-    }
-
-    async void Tester()
-    {
-        Global.Log(await Global.Http.Request("http://localhost/game", 10));
     }
 
     public override void _Process(float delta)

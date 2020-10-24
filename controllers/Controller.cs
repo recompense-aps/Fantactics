@@ -1,5 +1,4 @@
 using Godot;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,13 +19,15 @@ public class Controller : Node
         Guid = OS.GetUniqueId();
     }
 
-    protected string ExportUnitActionsJson()
+    protected List<UnitAction> GetAllUnitActions()
     {
-        StringBuilder builder = new StringBuilder();
+        List<UnitAction> actions = new List<UnitAction>();
         Units.ForEach(unit => {
-            builder.Append(unit.ExportActionsAsJson());
+            Global.Log(unit.Actions.Count);
+            actions.AddRange(unit.Actions);
             unit.FlushActions();
         });
-        return builder.ToString();
+        Global.Log(actions.Count);
+        return actions;
     }
 }

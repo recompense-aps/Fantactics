@@ -23,11 +23,12 @@ public class Global : Node
 
 public class HttpRequestManager : Godot.Object
 {
-    public async Task<HttpResponse> Request(string url, int timeout)
+    public async Task<HttpResponse> Request(string url, int timeout, string data = "")
     {
         HTTPRequest request = new HTTPRequest();
         Global.Instance.AddChild(request);
-        Error e = request.Request(url);
+        Error e = request.Request(url, new string[]{ "Content-Type: application/json" }, false, HTTPClient.Method.Post, data);
+        Global.Log(e);
         MonitorRequestTimeout(request, timeout, url);
         object[] response = await request.ToSignal(request, "request_completed");
         return new HttpResponse(response, url);

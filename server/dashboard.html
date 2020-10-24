@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    </head>
+    <body>
+
+        <pre id = "dash"></pre>
+
+    </body>
+    <script>
+        setInterval(() => {
+            axios.get('/status')
+            .then(function (response) {
+                // handle success
+                //console.log(response);
+                document.getElementById('dash').innerHTML = JSON.stringify(response.data, null, 4)
+            })
+            .catch(function (error) {
+                // handle error
+                document.getElementById('dash').innerHTML = JSON.stringify(error, null, 4)
+            })
+            .then(function () {
+                // always executed
+            })
+        }, 1000)
+    </script>
+</html>

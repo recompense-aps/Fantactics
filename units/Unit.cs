@@ -32,7 +32,7 @@ public class Unit : Area2D
     public GameTile GameBoardPosition{get; private set;}
     public StateManager<Unit> State {get; private set;}
     private HpDisplay hpDisplay;
-    private List<UnitAction> actions = new List<UnitAction>();
+    public List<UnitAction> Actions {get; private set;} = new List<UnitAction>();
     public static List<Unit> All
     {
         get
@@ -77,6 +77,7 @@ public class Unit : Area2D
 
     public void SetController(Controller controller)
     {
+        UnitController = controller;
         Guid = controller.Guid + "|" + GetInstanceId();
     }
 
@@ -93,8 +94,7 @@ public class Unit : Area2D
 
     public void RecordAction(UnitAction action)
     {
-        actions.Add(action);
-        Global.Log(ExportActionsAsJson());
+        Actions.Add(action);
     }
 
     public void RecordAction(string jsonAction){}
@@ -106,24 +106,17 @@ public class Unit : Area2D
 
     public void ReplayAllActions()
     {
-        actions.ForEach(async action => await action.Replay());
+        Actions.ForEach(async action => await action.Replay());
     }
 
     public void FlushActions()
     {
-        actions = new List<UnitAction>();
+        Actions = new List<UnitAction>();
     }
 
     public void LoadActionsFromJson(List<string> actionsJson)
     {
         actionsJson.ForEach(RecordAction);
-    }
-
-    public string ExportActionsAsJson()
-    {
-        List<string> jsonActions = new List<string>();
-        actions.ForEach(action => jsonActions.Add(action.ToJson()));
-        return "[" + string.Join(",", jsonActions) + "]";
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -185,7 +178,8 @@ public class Unit : Area2D
         EmitSignal(nameof(StartedDying));
         await Kill();
         EmitSignal(nameof(FinishedDying));
-        QueueFree();
+        //QueueFree();
+        // TODO: Some sort of dead state for later clean up
     }
     
     ////////////////////////////////////////////////////////////////////
@@ -254,68 +248,5 @@ public class Unit : Area2D
                 EmitSignal(nameof(Clicked));
             }
         }
-    }
-}
-
-public abstract class UnitAction : Godot.Object
-{
-    private string unitGuid;
-    protected Unit ActionUnit { get { return Unit.FromGuid(unitGuid); } }
-    protected Dictionary<string,object> serializationData = new Dictionary<string, object>();
-    public UnitAction(Unit unit)
-    {
-        unitGuid = unit.Guid;
-        serializationData.Add("unitGuid", unitGuid);
-        serializationData.Add("type", GetType().Name);
-    }
-    public abstract SignalAwaiter Replay();
-
-    public virtual string ToJson()
-    {
-        return JSON.Print(serializationData);
-    }
-}
-
-public class MoveAction : UnitAction
-{
-    public Vector2 WorldDestination {get; private set;}
-    public MoveAction(Unit unit, Vector2 worldDestination) : base(unit)
-    {
-        WorldDestination = worldDestination;
-    }
-
-    public override SignalAwaiter Replay()
-    {
-        ActionUnit.MoveToAction(WorldDestination);
-
-        return ActionUnit.ToSignal(ActionUnit, nameof(Unit.FinishedMoving));
-    }
-}
-
-public class FightAction : UnitAction
-{
-    public string OtherUnitGuid {get; private set;}
-
-    public FightAction(Unit unit, Unit otherUnit) : base(unit)
-    {
-        OtherUnitGuid = otherUnit.Guid;
-    }
-
-    public override SignalAwaiter Replay()
-    {
-        ActionUnit.FightAction(Unit.FromGuid(OtherUnitGuid));
-
-        return ActionUnit.ToSignal(ActionUnit, nameof(Unit.FinishedFighting));
-    }
-}
-
-public class DieAction : UnitAction
-{
-    public DieAction(Unit unit) : base(unit){}
-    public override SignalAwaiter Replay()
-    {
-        ActionUnit.DieAction();
-
-        return ActionUnit.ToSignal(ActionUnit, nameof(Unit.FinishedDying));
     }
 }
