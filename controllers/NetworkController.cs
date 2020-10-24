@@ -7,11 +7,7 @@ public class NetworkController : Controller
     {
         if(Input.IsActionJustPressed("ui_accept"))
         {
-            Vector2 pos = GetTree().Root.GetMousePosition();
-            Zombie z = Zombie.Scene.Instance();
-            z.Position = pos;
-            Global.Instance.AddChild(z);
-            z.SetController(this);
+            SpawnUnit();
         }
 
         if(Input.IsActionJustPressed("ui_end"))
@@ -29,7 +25,20 @@ public class NetworkController : Controller
         });
         string data = request.ToJson();
         Global.Log(data);
-        //HttpResponse response = await Global.Http.Request("http://localhost:3000/game", 5000, data);
+        HttpResponse response = await Global.Http.Request("http://192.168.1.21:3000/game/sync-units", 5000, data);
+    }
+
+    private async void SpawnUnit()
+    {
+        Vector2 pos = GetTree().Root.GetMousePosition();
+        Zombie z = Zombie.Scene.Instance();
+        z.Position = pos;
+        z.SetController(this);
+        Global.Instance.AddChild(z);
+
+        await ToSignal(z, nameof(Unit.FinishedSpawning));
+
+        z.State.Change<BasicIdleOnTurnState>();
     }
 }
 

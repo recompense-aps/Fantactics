@@ -59,6 +59,19 @@ public class FightAction : UnitAction
     }
 }
 
+public class SpawnAction : UnitAction
+{
+    public Vector2 SpawnWorldPosition{get; set;}
+    public SpawnAction(Unit unit) : base(unit){}
+
+    public override SignalAwaiter Replay()
+    {
+        ActionUnit.SpawnAction();
+
+        return ActionUnit.ToSignal(ActionUnit, nameof(Unit.FinishedSpawning));
+    }
+}
+
 public class DieAction : UnitAction
 {
     public DieAction(Unit unit) : base(unit){}

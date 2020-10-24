@@ -18,6 +18,7 @@ function handle(handler, ...args){
 }
 
 logger.disable('status')
+console.clear()
 
 app.get('/dashboard', (req, res) => {
     handle((req,res) => {
@@ -28,15 +29,23 @@ app.get('/dashboard', (req, res) => {
 })
 
 app.get('/status', (req, res) => {
-    logger.log('status', `${req.ip} is requesting status...`)
-    res.send( JSON.stringify(game, null, 4) )
-    logger.log('status', `served status to ${req.ip}`)
+    handle((req,res) => {
+        logger.log('status', `${req.ip} is requesting status...`)
+        res.send( JSON.stringify(game, null, 4) )
+        logger.log('status', `served status to ${req.ip}`)
+    }, req, res)
 })
 
 app.post('/game/sync-units', jsonParser, (req, res) => {
-    logger.log('sync-units', 'Syncing units...')
-    const response = game.handleRequest(req.body)
-    res.send(response)
+    handle((req,res) => {
+        logger.log('sync-units', 'Syncing units...')
+
+        // NOTE: req.body is an object, not a json string
+        const response = game.handleRequest(req.body)
+        
+        res.send(response)
+        logger.log('sync-units', 'Finished syncing units...')
+    }, req, res)
 })
   
 app.listen(port, () => {

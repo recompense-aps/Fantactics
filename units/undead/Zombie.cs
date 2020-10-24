@@ -8,7 +8,6 @@ public class Zombie : Unit
     {
         base._Ready();
         State.AllowSameChange = false;
-        State.Change<BasicIdleOnTurnState>();
     }
 
     public override void _Process(float delta)

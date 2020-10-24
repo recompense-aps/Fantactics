@@ -1,7 +1,5 @@
 const {FtRequest, FtRequestData}       = require('./requests')
 
-new FtRequestData({})
-
 class Game{
     constructor(){
         this.players = []

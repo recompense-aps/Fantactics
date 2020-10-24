@@ -3,14 +3,12 @@ const {requireValue} = require('./utils')
 class FtRequest{
     /**
      * 
-     * @param {String} json 
+     * @param {Object} jsonObject 
      */
-    constructor(json){
-        const raw = JSON.parse(json)
-
+    constructor(jsonObject){
         // implicitly transfer over the data
-        this.type = requireValue(raw.Type)
-        this.data = new FtRequestData( requireValue(raw.Data) )
+        this.type = requireValue(jsonObject.Type)
+        this.data = new FtRequestData( requireValue(jsonObject.Data) )
     }
 }
 

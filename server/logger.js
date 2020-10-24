@@ -17,7 +17,7 @@ const logger = {
         
         let output = colors.bold( color('[' + tag + ']') ) + '\t\t' + info
 
-        if(!this.disabled[tag]) console.log(output)
+        if(!this.disabled.includes(tag)) console.log(output)
     },
 
     disable(tag){

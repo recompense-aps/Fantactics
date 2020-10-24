@@ -17,6 +17,10 @@ public class Unit : Area2D
     [Signal]
     public delegate void FinishedFighting();
     [Signal]
+    public delegate void StartedSpawning();
+    [Signal]
+    public delegate void FinishedSpawning();
+    [Signal]
     public delegate void StartedDying();
     [Signal]
     public delegate void FinishedDying();
@@ -50,7 +54,7 @@ public class Unit : Area2D
 
     public override void _Ready()
     {
-        Guid = GetInstanceId().ToString();
+        Guid = Guid ?? GetInstanceId().ToString();
         State = new StateManager<Unit>();
         hpDisplay = HpDisplay.Scene.Instance();
         AddChild(State);
@@ -67,6 +71,8 @@ public class Unit : Area2D
 
         hpDisplay.SetValue(Hp);
         AddToGroup("units");
+
+        SpawnAction();
     }
 
     public void SetGamePosition(Vector2 position)
@@ -172,6 +178,32 @@ public class Unit : Area2D
         RecordAction(new FightAction(this, otherUnit));
     }
     
+    public async virtual void SpawnAction()
+    {
+        RecordAction(new SpawnAction(this));
+        EmitSignal(nameof(StartedSpawning));
+        Vector2 scale = new Vector2(Scale);
+        Vector2 scaleTo = new Vector2(scale * 2);
+
+        Tween t1 = new Tween();
+        t1.InterpolateProperty(this, "scale", scale, scaleTo, 0.25f);
+        AddChild(t1);
+        t1.Start();
+        
+        await ToSignal(t1, "tween_completed");
+        t1.QueueFree();
+
+        Tween t2 = new Tween();
+        AddChild(t2);
+        t2.InterpolateProperty(this, "scale", scaleTo, scale, 0.25f);
+        t2.Start();
+
+        await ToSignal(t2, "tween_completed");
+        t2.QueueFree();
+
+        EmitSignal(nameof(FinishedSpawning));
+    }
+
     public async virtual void DieAction()
     {
         RecordAction(new DieAction(this));
