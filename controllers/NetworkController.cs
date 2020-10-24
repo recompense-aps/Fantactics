@@ -3,6 +3,10 @@ using System;
 
 public class NetworkController : Controller
 {
+    public override void _Ready()
+    {
+        base._Ready();
+    }
     public override void _Process(float delta)
     {
         if(Input.IsActionJustPressed("ui_accept"))
@@ -26,6 +30,7 @@ public class NetworkController : Controller
         string data = request.ToJson();
         Global.Log(data);
         HttpResponse response = await Global.Http.Request("http://192.168.1.21:3000/game/sync-units", 5000, data);
+        UnitAction.FromJson(response.Body);
     }
 
     private async void SpawnUnit()

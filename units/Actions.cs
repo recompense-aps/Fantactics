@@ -18,8 +18,23 @@ public abstract class UnitAction
     }
     public abstract SignalAwaiter Replay();
 
-    public T FromJson<T>(string json) where T:UnitAction
+    public static List<UnitAction> FromJson(string json)
     {
+        var dict = JsonSerializer.Deserialize<Dictionary<string,object>>(json);
+        
+        if(dict.ContainsKey("unitActions"))
+        {
+            // List<object> unitActions = (List<object>)dict["unitActions"];
+            // Global.Log(unitActions.Count);
+            Global.Log(dict["unitActions"].GetType().Name);
+            JsonElement e = (JsonElement)dict["unitActions"];
+            
+        }
+        else
+        {
+            Global.Log("Not unit actions in json");
+        }
+
         return null;
     }
 }
@@ -38,6 +53,13 @@ public class MoveAction : UnitAction
         ActionUnit.MoveToAction(WorldDestination);
 
         return ActionUnit.ToSignal(ActionUnit, nameof(Unit.FinishedMoving));
+    }
+
+    // Recieves JsonData
+    public static MoveAction FromJson(Unit unit, JsonElement jsonData)
+    {
+        
+        return null;
     }
 }
 

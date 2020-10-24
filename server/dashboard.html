@@ -1,27 +1,43 @@
 <html>
     <head>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <style type="text/css">
+            body{background-color: black; color:white; padding: 5%; font-family: monospace;}
+        </style>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/dark.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', (event) => {
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightBlock(block);
+                });
+            });
+        </script>
     </head>
     <body>
+        <h1 style = "text-align: center;">Fantactics Game Server</h1>
 
-        <pre id = "dash"></pre>
+        <h2>Server State - Refreshed every 1 second(s)</h2>
+         <pre>
+             <code id = "dash" class = "language-json">
 
+             </code>
+         </pre>
     </body>
     <script>
         setInterval(() => {
             axios.get('/status')
-            .then(function (response) {
-                // handle success
-                //console.log(response);
-                document.getElementById('dash').innerHTML = JSON.stringify(response.data, null, 4)
-            })
-            .catch(function (error) {
-                // handle error
-                document.getElementById('dash').innerHTML = JSON.stringify(error, null, 4)
-            })
-            .then(function () {
-                // always executed
-            })
+                .then(function (response) {
+                    document.getElementById('dash').innerHTML = JSON.stringify(response.data, null, 4)
+                    document.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightBlock(block);
+                    });
+                })
+                .catch(function (error) {
+                    document.getElementById('dash').innerHTML = JSON.stringify(error, null, 4)
+                })
+                .then(function () {
+                })
         }, 1000)
     </script>
 </html>
