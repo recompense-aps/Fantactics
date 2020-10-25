@@ -41,6 +41,7 @@ class Server{
         this.bindGet('/dashboard', this.get_Dashboard)
         this.bindGet('/status', this.get_Status)
         this.bindPost('/game/create-game', this.post_CreateGame)
+        this.bindPost('/game/join-game', this.post_JoinGame)
         this.bindPost('/game/sync-units', this.post_SyncUnits)
     }
 
@@ -160,6 +161,10 @@ class Server{
         // This will just join the first avaliable game
         const ft = new FtRequest(req.body)
 
+        const data = new FtRequestData({
+            SenderGuid: ft.Data.SenderGuid
+        })  
+
         logger.log('game', `${ft.Data.SenderGuid} is looking for a game to join...`)
 
         const game = server.games.find(game => game.players.lenth < 2)
@@ -167,10 +172,14 @@ class Server{
         if(game){
             game.addPlayer(ft.Data.SenderGuid)
             logger.log('game', `${ft.Data.SenderGuid} joined game (${game.guid})`)
+            data.Success = 'Found a game to join'
         }
         else{
             logger.log('game', 'could not find any avaliable games')
+            data.Error = 'Could not find a game to join'
         }
+
+        res.send(JSON.stringify(data))
     }
 
     /////////////////////////////////////

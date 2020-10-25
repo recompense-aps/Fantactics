@@ -6,6 +6,7 @@ public class Global : Node
     public static Global Instance{get; private set;}
     public static HttpRequestManager Http {get;} = new HttpRequestManager();
     public static Map ActiveMap{get; set;}
+    public static Controller LocalController { get; set; }
     public static void Log(object message)
     {
         GD.Print(message);
@@ -15,9 +16,24 @@ public class Global : Node
         GD.PrintErr(message);
         return new Exception(message.ToString());
     }
+
+    public static SignalAwaiter WaitFor(int seconds)
+    {
+        Timer t = new Timer();
+        t.WaitTime = seconds;
+        t.Autostart = true;
+        t.Connect("timeout", Global.Instance, nameof(RemoveNode), new Godot.Collections.Array(){ t });
+        Instance.AddChild(t);
+        return t.ToSignal(t, "timeout");
+    }
     public override void _Ready()
     {
         Instance = this;
+    }
+
+    public void RemoveNode(Node node)
+    {
+        node.QueueFree();
     }
 }
 
@@ -28,7 +44,6 @@ public class HttpRequestManager : Godot.Object
         HTTPRequest request = new HTTPRequest();
         Global.Instance.AddChild(request);
         Error e = request.Request(url, new string[]{ "Content-Type: application/json" }, false, HTTPClient.Method.Post, data);
-        Global.Log(e);
         MonitorRequestTimeout(request, timeout, url);
         object[] response = await request.ToSignal(request, "request_completed");
         return new HttpResponse(response, url);

@@ -8,28 +8,58 @@ public class SimpleLobby : Node2D
     public override void _Ready()
     {
         debugText = GetNode<RichTextLabel>("RichTextLabel");
+        BasicPopup.Notify("Testing");
     }
 
     private void _on_StartGameButton_pressed()
     {
-        StartGame();
+        CreateGame();
     }
 
     private void _on_JoinGameButton_pressed()
     {
-
+        JoinGame();
     }
 
-    private async void StartGame()
+    private async void CreateGame()
     {
-        FtRequest request = new FtRequest(FtRequestType.CreateGame, new FtRequestData()
+        FtRequestData data = await Game.Service.CreateGame();
+        if(!string.IsNullOrEmpty(data.Success))
         {
-            SenderGuid = OS.GetUniqueId(),
-            SenderName = System.Environment.MachineName
-        });
+            debugText.Text = data.Success + "\n Starting game...";
+            await Global.WaitFor(2);
 
-        HttpResponse response = await Global.Http.Request("http://192.168.1.21:3000/game/create-game", 5000, request.ToJson());
-        FtRequestData data = JsonSerializer.Deserialize<FtRequestData>(response.Body);
-        debugText.Text = data.Success;
+            Global.LocalController = new NetworkController()
+            {
+                HasInitiative = true
+            };
+
+            GetTree().ChangeScene("res://games/SimpleGame.tscn");
+        }
+        else
+        {
+            debugText.Text = data.Error;
+        }
+    }
+
+    private async void JoinGame()
+    {
+        FtRequestData data = await Game.Service.JoinGame();
+        if(!string.IsNullOrEmpty(data.Success))
+        {
+            debugText.Text = data.Success + "\n Joining game...";
+            await Global.WaitFor(2);
+
+            Global.LocalController = new NetworkController()
+            {
+                HasInitiative = false
+            };
+
+            GetTree().ChangeScene("res://games/SimpleGame.tscn");
+        }
+        else
+        {
+            debugText.Text = data.Error;
+        }
     }
 }

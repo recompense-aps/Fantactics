@@ -43,7 +43,14 @@ public class NetworkController : Controller
 
         await ToSignal(z, nameof(Unit.FinishedSpawning));
 
-        z.State.Change<BasicIdleOnTurnState>();
+        if(HasInitiative)
+        {
+            z.State.Change<BasicIdleOnTurnState>();
+        }
+        else
+        {
+            z.State.Change<BasicIdleState>();
+        }
     }
 }
 

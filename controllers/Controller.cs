@@ -4,6 +4,7 @@ using System.Linq;
 
 public class Controller : Node
 {
+    public bool HasInitiative {get; set;}
     public string Guid {get; protected set;}
     public List<Unit> Units
     {
