@@ -12,3 +12,5 @@ data_*/
 
 # node stuff
 node_modules/
+
+*.log

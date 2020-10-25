@@ -1,16 +1,19 @@
 const express                       = require('express')
 const bodyParser                    = require('body-parser')
-const {logger}                      = require('./logger')
-const {Game}                        = require('./Game')
-const {FtRequest, FtRequestData}    = require('./requests')
+const fs                            = require('fs')
+const { networkInterfaces }         = require('os')
+const { logger }                    = require('./logger')
+const { Game }                      = require('./game')
+const { FtRequest, FtRequestData }  = require('./requests')
 
 const jsonParser = bodyParser.json()
 
 class Server{
     constructor(){
         this.________ = 'FANTACTICS SERVER'
-        this.games = []
-        this.app = express()
+        this.requests           = []
+        this.games              = []
+        this.app                = express()
         this.initializeRoutes()
     }
 
@@ -18,6 +21,10 @@ class Server{
         this.port = port
         this.app.listen(port, () => {
             logger.log('info', `Fantactics server started at http://localhost:${this.port}`)
+            const ipInfo = networkInterfaces().Ethernet[1]
+            for(let key in ipInfo){
+                logger.log('info', key + ':\t\t' + ipInfo[key])
+            }
         })
     }
 
@@ -39,14 +46,59 @@ class Server{
 
     bindGet(route, handler){
         this.app.get(route, jsonParser, (req,res) => {
+            this.logRequest(req.body)
             this.handle(handler, this,req,res)
         })
     }
 
     bindPost(route, handler){
         this.app.post(route, jsonParser, (req,res) => {
+            this.logRequest(req.body)
             this.handle(handler, this,req,res)
         })
+    }
+
+    logRequest(req){
+        this.requests.push(req)
+    }
+
+    handleCommand(command){
+        switch(command){
+            case 'flush':
+                this.flush()
+                break
+            case 'save':
+                this.save()
+                break
+            case 'dump':
+                this.dump()
+                break
+            case 'stop':
+                this.stop()
+                break
+            default:
+                logger.log('error', `${command} is not a valid command`)
+        }
+    }
+
+    flush(){
+        this.games = []
+        this.requests = []
+        logger.log('info', 'Flushed server state')
+    }
+
+    save(){
+        fs.writeFileSync(`logs/saves/${new Date().toISOString().replace(/\:/g, '-')}.log`, JSON.stringify(this, null, 4))
+        logger.log('info', 'Saved server state')
+    }
+
+    dump(){
+        const json = JSON.stringify(this, null, 4)
+        json.split('\n').forEach(line => logger.log('info', line))
+    }
+
+    stop(){
+        process.exit(0)
     }
 
     ///////////////////////////////////
