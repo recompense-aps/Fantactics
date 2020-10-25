@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Text.Json;
 
@@ -16,6 +17,8 @@ public class Game : Node2D
     {
         LocalController = Global.LocalController;
         Global.LocalController = null;
+        AddChild(LocalController);
+
         State = new StateManager<Game>();
         State.Change<GameSetupState>();
     }
@@ -52,6 +55,22 @@ public class GameService
         });
 
         HttpResponse response = await Global.Http.Request(Route("join-game"), 5000, request.ToJson());
+        FtRequestData data = JsonSerializer.Deserialize<FtRequestData>(response.Body);
+
+        return data;
+    }
+
+    public async Task<FtRequestData> Sync(List<object> unitActions)
+    {
+        FtRequest request = new FtRequest(FtRequestType.Sync, new FtRequestData()
+        {
+            SenderGuid = OS.GetUniqueId(),
+            SenderName = System.Environment.MachineName,
+            UnitActions = unitActions
+        });
+
+        HttpResponse response = await Global.Http.Request(Route("sync"), 5000, request.ToJson());
+        Global.Log(response.Body);
         FtRequestData data = JsonSerializer.Deserialize<FtRequestData>(response.Body);
 
         return data;

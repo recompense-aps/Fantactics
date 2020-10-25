@@ -42,7 +42,7 @@ class Server{
         this.bindGet('/status', this.get_Status)
         this.bindPost('/game/create-game', this.post_CreateGame)
         this.bindPost('/game/join-game', this.post_JoinGame)
-        this.bindPost('/game/sync-units', this.post_SyncUnits)
+        this.bindPost('/game/sync', this.post_Sync)
     }
 
     bindGet(route, handler){
@@ -118,20 +118,18 @@ class Server{
         logger.log('status', `served status to ${req.ip}`)
     }
 
-    post_SyncUnits(server, req, res){
+    post_Sync(server, req, res){
         const ft = new FtRequest(req.body)
-        logger.log('game', `${ft.Data.SenderGuid} is syncing units...`)
+        logger.log('game', `${ft.Data.SenderName} is syncing...`)
 
         const game = server.findGameFromSenderGuid(ft.Data.SenderGuid)
 
         if(game){
-            // NOTE: req.body is an object, not a json string
             const response = game.handleRequest(req.body)
-            
             res.send(response)
         }
         else{
-            res.send( JSON.stringify({ Error: 'Could not sync units. Could not find a game' }) )
+            res.send( JSON.stringify({ Error: 'Could not sync. Could not find a game' }) )
         }
     }
 
@@ -186,7 +184,7 @@ class Server{
     //  Helpers
     /////////////////////////////////////
     findGameFromSenderGuid(guid){
-        const game = this.games.find(game => game.players.find(player => player.guid === ft.Data.SenderGuid))
+        const game = this.games.find(game => game.players.find(player => player.guid === guid))
 
         if(game){
             logger.log('game', `found game that ${guid} is a part of`)

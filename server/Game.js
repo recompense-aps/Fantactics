@@ -1,4 +1,5 @@
 const {FtRequest, FtRequestData}       = require('./requests')
+const {logger}                         = require('./logger')
 
 class Game{
     constructor(guid, name){
@@ -10,43 +11,44 @@ class Game{
     handleRequest(requestJson){
         const req = new FtRequest(requestJson)
         let response
-        switch(req.type){
-            case 'SyncUnits':
-                response = this.handleSyncUnitsRequest(req)
+        switch(req.Type){
+            case 'sync':
+                response = this.sync(req.Data)
                 break
+            default:
+                const error = `Cannot handle game request. '${req.Type}' is not a valid request type`
+                response = JSON.stringify(new FtRequestData({ SenderGuid:req.Data.SenderGuid, Error: error }))
+                logger.log('error', error)
         }
         return JSON.stringify(response)
     }
 
     /**
      * 
-     * @param {FtRequest} request
+     * @param {FtRequestData} data
      * @returns {FtRequestData}
      */
-    handleSyncUnitsRequest(request){
-        let player = this.players.find(player => player.guid === request.data.senderGuid)
+    sync(data){
+        const sendingPlayer = this.players.find(player => player.guid === data.SenderGuid)
+        const otherPlayers = this.players.filter(player => player.guid !== sendingPlayer.guid)
 
-        if(!player){
-            // player doesn't exist yet, create it
-            player = new Player(request.data.senderGuid)
-            this.players.push(player)
-        }
-
-        // sync all the unit data
-        this.players.forEach(p => {
-            p.syncUnitActions(request.data)
+        // add data to other players that they will need to sync
+        otherPlayers.forEach(player => {
+            player.toSync.UnitActions.push(...data.UnitActions)
+            player.toSync.Notifications.push(...data.Notifications)
         })
 
-        // send back the actions not synced
-        let response = new FtRequestData({
-            SenderGuid:     player.guid,
-            UnitActions:    player.unitActions.unSynced
+        // grab data this player needs to sync
+        const returnData = new FtRequestData({
+            SenderGuid: data.SenderGuid,
+            SenderName: data.SenderName,
+            ...sendingPlayer.toSync
         })
 
-        // flush the unsynced actions
-        player.unitActions.unSynced = []
+        // reset
+        sendingPlayer.toSync.reset()
 
-        return response
+        return returnData
     }
 
     addPlayer(guid, name){
@@ -61,31 +63,22 @@ class Player{
      * @param {String} name
      */
     constructor(guid, name){
-        this.guid = guid
-        this.name = name || guid
-        this.unitActions = {
-            // Unit actions that belong to this player
-            own:        [],
-            // Unit actions from other players that need to
-            // be sent down to the game
-            unSynced:   []
-        }
+        this.guid       = guid
+        this.name       = name || guid
+        this.toSync     = new SyncablePlayerData()
+    }
+}
+
+class SyncablePlayerData
+{
+    constructor(){
+        this.UnitActions    = []
+        this.Notifications  = []
     }
 
-    /**
-     * Takes unit actions and if the unit actions
-     * belong to this player, the ations are added to the 'own'
-     * collection, otherwise they are stored in the 'unSynced'
-     * collection
-     * @param {FtRequestData} data 
-     */
-    syncUnitActions(data){
-        if(data.senderGuid === this.guid){
-            this.unitActions.own.push(...data.unitActions)
-        }
-        else{
-            this.unitActions.unSynced.push(...data.unitActions)
-        }
+    reset(){
+        this.UnitActions    = []
+        this.Notifications  = []
     }
 }
 

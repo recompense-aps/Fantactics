@@ -21,6 +21,7 @@ class FtRequestData{
         this.Success        = rawObject.Success
         this.SenderName     = rawObject.SenderName
         this.Message        = rawObject.Message
+        this.Notifications  = rawObject.Notifications
     }
 }
 
