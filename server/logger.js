@@ -7,7 +7,7 @@ const logger = {
         'info':         colors.magenta,
         'dash':         colors.cyan,
         'status':       colors.gray,
-        'sync-units':   colors.blue
+        'game':         colors.blue
     },
 
     disabled: [],
@@ -22,7 +22,6 @@ const logger = {
 
     disable(tag){
         this.disabled.push(tag)
-        console.log(this.disabled)
     }
 
 }

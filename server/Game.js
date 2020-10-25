@@ -1,8 +1,10 @@
 const {FtRequest, FtRequestData}       = require('./requests')
 
 class Game{
-    constructor(){
-        this.players = []
+    constructor(guid, name){
+        this.guid       = guid
+        this.players    = []
+        this.name       = name || guid
     }
 
     handleRequest(requestJson){
@@ -47,8 +49,8 @@ class Game{
         return response
     }
 
-    addPlayer(guid){
-        this.players.push(new Player(guid));
+    addPlayer(guid, name){
+        this.players.push(new Player(guid, name));
     }
 }
 
@@ -56,10 +58,11 @@ class Player{
     /**
      * 
      * @param {String} guid 
+     * @param {String} name
      */
-    constructor(guid){
+    constructor(guid, name){
         this.guid = guid
-        this.name = 'UnNamedPlayer|' + guid
+        this.name = name || guid
         this.unitActions = {
             // Unit actions that belong to this player
             own:        [],

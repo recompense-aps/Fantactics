@@ -7,16 +7,20 @@ class FtRequest{
      */
     constructor(jsonObject){
         // implicitly transfer over the data
-        this.type = requireValue(jsonObject.Type)
-        this.data = new FtRequestData( requireValue(jsonObject.Data) )
+        this.Type = requireValue(jsonObject.Type)
+        this.Data = new FtRequestData( requireValue(jsonObject.Data) )
     }
 }
 
 class FtRequestData{
     constructor(rawObject){
         // implicitly transfer over the data
-        this.senderGuid     = requireValue(rawObject.SenderGuid)
-        this.unitActions    = requireValue(rawObject.UnitActions)
+        this.SenderGuid     = requireValue(rawObject.SenderGuid)
+        this.UnitActions    = rawObject.UnitActions || []
+        this.Error          = rawObject.Error
+        this.Success        = rawObject.Success
+        this.SenderName     = rawObject.SenderName
+        this.Message        = rawObject.Message
     }
 }
 

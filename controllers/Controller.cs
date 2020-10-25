@@ -19,9 +19,9 @@ public class Controller : Node
         Guid = OS.GetUniqueId();
     }
 
-    protected List<UnitAction> GetAllUnitActions()
+    protected List<object> GetAllUnitActions()
     {
-        List<UnitAction> actions = new List<UnitAction>();
+        List<object> actions = new List<object>();
         Units.ForEach(unit => {
             Global.Log(unit.Actions.Count);
             actions.AddRange(unit.Actions);

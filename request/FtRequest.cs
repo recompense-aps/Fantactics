@@ -22,4 +22,4 @@ public class FtRequest
     }
 }
 
-public enum FtRequestType{ CreateGame, SyncUnits }
+public enum FtRequestType{ JoinGame, CreateGame, SyncUnits  }

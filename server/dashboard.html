@@ -4,13 +4,16 @@
         <style type="text/css">
             body{background-color: black; color:white; padding: 5%; font-family: monospace;}
         </style>
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/dark.min.css">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/dracula.min.css">
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', (event) => {
+            function highlight(){
                 document.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightBlock(block);
+                    hljs.highlightBlock(block)
                 });
+            }
+            document.addEventListener('DOMContentLoaded', (event) => {
+                highlight()
             });
         </script>
     </head>
@@ -29,12 +32,12 @@
             axios.get('/status')
                 .then(function (response) {
                     document.getElementById('dash').innerHTML = JSON.stringify(response.data, null, 4)
-                    document.querySelectorAll('pre code').forEach((block) => {
-                        hljs.highlightBlock(block);
-                    });
+                    highlight()
+                    
                 })
                 .catch(function (error) {
                     document.getElementById('dash').innerHTML = JSON.stringify(error, null, 4)
+                    highlight()
                 })
                 .then(function () {
                 })
