@@ -8,7 +8,6 @@ public class SimpleLobby : Node2D
     public override void _Ready()
     {
         debugText = GetNode<RichTextLabel>("RichTextLabel");
-        BasicPopup.Notify("Testing");
     }
 
     private void _on_StartGameButton_pressed()

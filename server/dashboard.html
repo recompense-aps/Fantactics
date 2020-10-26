@@ -31,6 +31,7 @@
         setInterval(() => {
             axios.get('/status')
                 .then(function (response) {
+                    response.data.requests = null
                     document.getElementById('dash').innerHTML = JSON.stringify(response.data, null, 4)
                     highlight()
                     
