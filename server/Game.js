@@ -40,8 +40,10 @@ class Game{
 
         // add data to other players that they will need to sync
         otherPlayers.forEach(player => {
-            player.toSync.UnitActions.push(...data.UnitActions)
-            player.toSync.Notifications.push(...data.Notifications)
+            if(data.UnitActions)
+                player.toSync.UnitActions.push(...data.UnitActions)
+            if(data.Notifications)
+                player.toSync.Notifications.push(...data.Notifications)
         })
 
         // grab data this player needs to sync

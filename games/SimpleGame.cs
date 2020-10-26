@@ -70,7 +70,10 @@ public class GameService
             UnitActions = unitActions
         });
 
-        HttpResponse response = await Global.Http.Request(Route("sync"), 5000, request.ToJson());
+        string json = request.ToJson();
+        Global.Log(json);
+
+        HttpResponse response = await Global.Http.Request(Route("sync"), 5000, json);
         Global.Log(response.Body);
         FtRequestData data = JsonSerializer.Deserialize<FtRequestData>(response.Body);
 

@@ -31,12 +31,18 @@ public class Unit : Area2D
     public int Speed{get; protected set;}           = 2;
     public int AttackRange{get; protected set;}     = 1;
 
-    public string Guid{get; private set;}
+    public string Guid{get; set;}
     public Controller UnitController{get; set;}
     public GameTile GameBoardPosition{get; private set;}
     public StateManager<Unit> State {get; private set;}
     private HpDisplay hpDisplay;
+    private bool wasPressed = false;
     public List<UnitAction> Actions {get; private set;} = new List<UnitAction>();
+
+    ///////////////////////////////////////////////////////////////////
+    //   Static utility methods
+    ////////////////////////////////////////////////////////////////////
+
     public static List<Unit> All
     {
         get
@@ -50,7 +56,12 @@ public class Unit : Area2D
         return All.Where(unit => unit.Guid == guid).FirstOrDefault();
     }
 
-    private bool wasPressed = false;
+    public static Unit Spawn(Unit unit, Vector2 worldPosition)
+    {
+        unit.GlobalPosition = worldPosition;
+        Global.Instance.AddChild(unit);
+        return unit;
+    }
 
     public override void _Ready()
     {

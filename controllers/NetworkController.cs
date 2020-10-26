@@ -30,9 +30,9 @@ public class NetworkController : Controller
     {
         Vector2 pos = GetTree().Root.GetMousePosition();
         Zombie z = Zombie.Scene.Instance();
-        z.Position = pos;
         z.SetController(this);
-        Global.Instance.AddChild(z);
+
+        Unit.Spawn(z, pos);
 
         await ToSignal(z, nameof(Unit.FinishedSpawning));
 

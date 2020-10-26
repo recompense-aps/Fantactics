@@ -6,10 +6,14 @@ using System.Text.Json.Serialization;
 
 public abstract class UnitAction
 {
-    public string UnitGuid{get; private set;}
+    public string UnitGuid{get; set;}
     public Dictionary<string,object> JsonData {get; set;}
     [JsonIgnore]
     protected Unit ActionUnit { get { return Unit.FromGuid(UnitGuid); } }
+    public UnitAction()
+    {
+
+    }
     public UnitAction(Unit unit)
     {
         UnitGuid = unit.Guid;
@@ -18,21 +22,26 @@ public abstract class UnitAction
     }
     public abstract SignalAwaiter Replay();
 
-    public static List<UnitAction> FromJson(string json)
+    public static List<UnitAction> TransformFromJson(JsonElement unitActions)
     {
-        var dict = JsonSerializer.Deserialize<Dictionary<string,object>>(json);
+        List<UnitAction> actions = new List<UnitAction>();
         
-        if(dict.ContainsKey("unitActions"))
+        foreach(JsonElement elem in unitActions.EnumerateArray())
         {
-            // List<object> unitActions = (List<object>)dict["unitActions"];
-            // Global.Log(unitActions.Count);
-            Global.Log(dict["unitActions"].GetType().Name);
-            JsonElement e = (JsonElement)dict["unitActions"];
-            
-        }
-        else
-        {
-            Global.Log("Not unit actions in json");
+            JsonElement jsonData = elem.GetProperty(nameof(JsonData));
+            string unitGuid = jsonData.GetProperty(nameof(UnitGuid)).GetString();
+            string unitActionType = jsonData.GetProperty("UnitActionType").GetString(); 
+            switch(unitActionType)
+            {
+                case nameof(MoveAction):
+                    actions.Add(MoveAction.FromJson(unitGuid, jsonData));
+                    break;
+                case nameof(SpawnAction):
+
+                    break;
+                default:
+                    throw Global.Error(string.Format("{0} is not a valid UnitActionType", unitActionType));
+            }
         }
 
         return null;
@@ -42,6 +51,18 @@ public abstract class UnitAction
 public class MoveAction : UnitAction
 {
     public Vector2 WorldDestination {get; private set;}
+
+    public static MoveAction FromJson(string unitGuid, JsonElement jsonData)
+    {
+        Unit unit = Unit.FromGuid(unitGuid);
+        JsonElement worldDestination = jsonData.GetProperty(nameof(WorldDestination));
+
+        float x = worldDestination.GetProperty("x").GetSingle();
+        float y = worldDestination.GetProperty("x").GetSingle();
+
+        return new MoveAction(unit, new Vector2(x,y));
+    }
+
     public MoveAction(Unit unit, Vector2 worldDestination) : base(unit)
     {
         WorldDestination = worldDestination;
@@ -53,13 +74,6 @@ public class MoveAction : UnitAction
         ActionUnit.MoveToAction(WorldDestination);
 
         return ActionUnit.ToSignal(ActionUnit, nameof(Unit.FinishedMoving));
-    }
-
-    // Recieves JsonData
-    public static MoveAction FromJson(Unit unit, JsonElement jsonData)
-    {
-        
-        return null;
     }
 }
 
@@ -84,11 +98,48 @@ public class FightAction : UnitAction
 public class SpawnAction : UnitAction
 {
     public Vector2 SpawnWorldPosition{get; set;}
-    public SpawnAction(Unit unit) : base(unit){}
+    public string UnitType {get; set;}
+
+    public static SpawnAction FromJson(string unitGuid, JsonElement jsonData)
+    {
+        SpawnAction action = new SpawnAction();
+
+        JsonElement spawnWorldPosition = jsonData.GetProperty(nameof(SpawnWorldPosition));
+        JsonElement unitType = jsonData.GetProperty(nameof(SpawnWorldPosition));
+
+        float x = spawnWorldPosition.GetProperty("x").GetSingle();
+        float y = spawnWorldPosition.GetProperty("x").GetSingle();
+
+        action.UnitGuid = unitGuid;
+        action.SpawnWorldPosition = new Vector2(x,y);
+        action.UnitType = unitType.GetString();
+
+        return action;
+    }
+
+    public SpawnAction(Unit unit) : base(unit)
+    {
+        SpawnWorldPosition = new Vector2(unit.GlobalPosition);
+        UnitType = unit.GetType().Name;
+    }
+
+    public SpawnAction(){}
 
     public override SignalAwaiter Replay()
     {
-        ActionUnit.SpawnAction();
+        // little different, need to create the unit
+        // when it gets created, spawn action happens
+        Unit unit = null;
+        switch(UnitType)
+        {
+            case nameof(Zombie):
+                unit = Zombie.Scene.Instance();
+                break;
+        }
+        
+        unit.Guid = UnitGuid;
+
+        Unit.Spawn(unit, SpawnWorldPosition);
 
         return ActionUnit.ToSignal(ActionUnit, nameof(Unit.FinishedSpawning));
     }

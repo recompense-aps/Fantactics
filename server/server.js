@@ -167,7 +167,7 @@ class Server{
 
         logger.log('game', `${ft.Data.SenderGuid} is looking for a game to join...`)
 
-        const game = server.games.find(game => game.players.lenth < 2)
+        const game = server.games.find(game => game.players.length < 2)
 
         if(game){
             game.addPlayer(ft.Data.SenderGuid)
