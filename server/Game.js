@@ -8,19 +8,25 @@ class Game{
         this.name       = name || guid
     }
 
-    handleRequest(requestJson){
-        const req = new FtRequest(requestJson)
+    /**
+     * 
+     * @param {FtRequest} request
+     * @returns {FtRequestData}
+     */
+    handleRequest(request){
         let response
-        switch(req.Type){
-            case 'sync':
-                response = this.sync(req.Data)
+
+        switch(request.Type){
+            case 'Sync':
+                response = this.sync(request.Data)
                 break
             default:
-                const error = `Cannot handle game request. '${req.Type}' is not a valid request type`
-                response = JSON.stringify(new FtRequestData({ SenderGuid:req.Data.SenderGuid, Error: error }))
+                const error = `Cannot handle game request. ${request.Type} is not a valid request type`
+                response = new FtRequestData({ SenderGuid:request.Data.SenderGuid, Error: error })
                 logger.log('error', error)
         }
-        return JSON.stringify(response)
+
+        return response
     }
 
     /**

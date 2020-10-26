@@ -41,6 +41,7 @@ public class GameService
         });
 
         HttpResponse response = await Global.Http.Request(Route("create-game"), 5000, request.ToJson());
+        Global.Log(response.Body);
         FtRequestData data = JsonSerializer.Deserialize<FtRequestData>(response.Body);
 
         return data;

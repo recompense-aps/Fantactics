@@ -125,10 +125,12 @@ class Server{
         const game = server.findGameFromSenderGuid(ft.Data.SenderGuid)
 
         if(game){
-            const response = game.handleRequest(req.body)
-            res.send(response)
+            const response = game.handleRequest(ft)
+            logger.log('pass', `${ft.Data.SenderName} sync succeeded`)
+            res.send(JSON.stringify(response))
         }
         else{
+            logger.log('error', `${ft.Data.SenderName} sync failed`)
             res.send( JSON.stringify({ Error: 'Could not sync. Could not find a game' }) )
         }
     }

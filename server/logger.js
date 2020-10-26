@@ -7,7 +7,8 @@ const logger = {
         'info':         colors.magenta,
         'dash':         colors.cyan,
         'status':       colors.gray,
-        'game':         colors.blue
+        'game':         colors.blue,
+        'pass':         colors.green
     },
 
     disabled: [],
