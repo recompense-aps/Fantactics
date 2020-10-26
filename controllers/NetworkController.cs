@@ -1,5 +1,7 @@
 using Godot;
+using System.Linq;
 using System.Collections.Generic;
+using System.Text.Json;
 
 public class NetworkController : Controller
 {
@@ -24,6 +26,12 @@ public class NetworkController : Controller
     {
         FtRequestData response = await Game.Service.Sync(GetAllUnitActions());
         Global.Log(response.ToJson());
+
+        // transform unit actions
+        List<UnitAction> actions = UnitAction.TransformFromJson( response.UnitActions.Cast<JsonElement>().ToList() );
+
+        // replay the unit actions
+        actions.ForEach(async action => await action.Replay());
     }
 
     private async void SpawnUnit()

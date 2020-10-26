@@ -63,6 +63,24 @@ public class Unit : Area2D
         return unit;
     }
 
+    public static Unit SpawnWithUnitName(string unitName, Vector2 worldPosition)
+    {
+        Unit unit = null;
+        switch(unitName)
+        {
+            case nameof(Zombie):
+                unit = Zombie.Scene.Instance();
+                break;
+        }
+
+        if(unit != null)
+        {
+            return Spawn(unit, worldPosition);
+        }
+
+        return unit;
+    }
+
     public override void _Ready()
     {
         Guid = Guid ?? GetInstanceId().ToString();
