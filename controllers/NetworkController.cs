@@ -37,6 +37,11 @@ public class NetworkController : Controller
     private async void SpawnUnit()
     {
         Vector2 pos = GetTree().Root.GetMousePosition();
+
+        // don't spawn if a unit is already there
+        Vector2 gameBoardPosition = Global.ActiveMap.GetBoardPositionFromWorldPosition(pos);
+        if(Global.ActiveMap.CellHasUnit(gameBoardPosition)) return;
+
         Zombie z = Zombie.Scene.Instance();
         z.SetController(this);
 
