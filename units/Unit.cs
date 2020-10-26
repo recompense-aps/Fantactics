@@ -81,6 +81,9 @@ public class Unit : Area2D
         return unit;
     }
 
+    ///////////////////////////////////////////////////////////////////
+    //   Overridden Godot callbacks
+    ////////////////////////////////////////////////////////////////////
     public override void _Ready()
     {
         Guid = Guid ?? GetInstanceId().ToString();
@@ -104,6 +107,9 @@ public class Unit : Area2D
         SpawnAction();
     }
 
+    ///////////////////////////////////////////////////////////////////
+    //   Public non-virtual methods
+    ////////////////////////////////////////////////////////////////////
     public void SetGamePosition(Vector2 position)
     {
         Position = Global.ActiveMap.GetWorldPositionFromCell(position);

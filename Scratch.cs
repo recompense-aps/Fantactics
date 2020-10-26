@@ -49,7 +49,5 @@ public class Scratch : Node2D
         FtRequestData data = JsonSerializer.Deserialize<FtRequestData>(json);
         JsonElement e = (JsonElement)data.UnitActions[0];
         string type = data.UnitActions[0].GetType().Name;
-
-        UnitAction.TransformFromJson(e);
     }
 }
