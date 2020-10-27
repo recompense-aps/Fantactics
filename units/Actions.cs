@@ -53,7 +53,7 @@ public abstract class UnitAction
             }
         }
 
-        return null;
+        return actions;
     }
 }
 
