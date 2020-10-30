@@ -29,7 +29,7 @@ public abstract class UnitAction
         foreach(JsonElement elem in unitActions)
         {
             JsonElement jsonData = elem.GetProperty(nameof(JsonData));
-            string unitGuid = jsonData.GetProperty(nameof(UnitGuid)).GetString();
+            string unitGuid = elem.GetProperty(nameof(UnitGuid)).GetString();
             string unitActionType = jsonData.GetProperty("UnitActionType").GetString(); 
             switch(unitActionType)
             {
@@ -123,7 +123,7 @@ public class SpawnAction : UnitAction
         SpawnAction action = new SpawnAction();
 
         JsonElement spawnWorldPosition = jsonData.GetProperty(nameof(SpawnWorldPosition));
-        JsonElement unitType = jsonData.GetProperty(nameof(SpawnWorldPosition));
+        JsonElement unitType = jsonData.GetProperty(nameof(UnitType));
 
         float x = spawnWorldPosition.GetProperty("x").GetSingle();
         float y = spawnWorldPosition.GetProperty("x").GetSingle();
@@ -139,6 +139,8 @@ public class SpawnAction : UnitAction
     {
         SpawnWorldPosition = new Vector2(unit.GlobalPosition);
         UnitType = unit.GetType().Name;
+        JsonData.Add(nameof(SpawnWorldPosition), new {x = SpawnWorldPosition.x, y = SpawnWorldPosition.y});
+        JsonData.Add(nameof(UnitType), UnitType);
     }
 
     public SpawnAction(){}

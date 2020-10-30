@@ -4,6 +4,7 @@ const fs                            = require('fs')
 const { networkInterfaces }         = require('os')
 const { logger }                    = require('./logger')
 const { Game }                      = require('./game')
+const {Mock}                        = require('./mock')
 const { FtRequest, FtRequestData }  = require('./requests')
 
 const jsonParser = bodyParser.json()
@@ -15,6 +16,7 @@ class Server{
         this.games              = []
         this.app                = express()
         this.initializeRoutes()
+        this.mock               = new Mock(this)
     }
 
     start(port){
@@ -63,7 +65,15 @@ class Server{
         this.requests.push(req)
     }
 
+    /**
+     * 
+     * @param {String} command 
+     */
     handleCommand(command){
+        if(command.includes('mock')){
+            return this.mock.handleCommand(command.split(' ')[1] || logger.log('error', 'mock command requires an argument'))
+        }
+
         switch(command){
             case 'flush':
                 this.flush()
@@ -94,7 +104,10 @@ class Server{
     }
 
     dump(){
-        const json = JSON.stringify(this, null, 4)
+        const clone = Object.assign({}, this)
+        delete clone.mock
+
+        const json = JSON.stringify(clone, null, 4)
         json.split('\n').forEach(line => logger.log('info', line))
     }
 
@@ -120,39 +133,17 @@ class Server{
 
     post_Sync(server, req, res){
         const ft = new FtRequest(req.body)
-        logger.log('game', `${ft.Data.SenderName} is syncing...`)
 
-        const game = server.findGameFromSenderGuid(ft.Data.SenderGuid)
+        const data = server.sync(ft)
 
-        if(game){
-            const response = game.handleRequest(ft)
-            logger.log('pass', `${ft.Data.SenderName} sync succeeded`)
-            res.send(JSON.stringify(response))
-        }
-        else{
-            logger.log('error', `${ft.Data.SenderName} sync failed`)
-            res.send( JSON.stringify({ Error: 'Could not sync. Could not find a game' }) )
-        }
+        res.send(JSON.stringify(data))
     }
 
     post_CreateGame(server, req, res){
-        // the games id will be the guid of the player
-        // that creates it
         const ft = new FtRequest(req.body)
 
-        logger.log('game', `${ft.Data.SenderName} is requesting to create a game...`)
-
-        const game = new Game(ft.Data.SenderGuid, ft.Data.SenderName)
-        server.games.push(game)
-        game.addPlayer(ft.Data.SenderGuid, ft.Data.SenderName)
-
-        logger.log('game', `${ft.Data.SenderName} created game successfully`)
-
-        const data = new FtRequestData({
-            SenderGuid: ft.Data.SenderGuid,
-            Success:    'created game successfully'
-        })
-
+        const data = server.createGame(ft)
+        
         res.send(JSON.stringify(data))
     }
 
@@ -183,7 +174,7 @@ class Server{
     }
 
     /////////////////////////////////////
-    //  Helpers
+    //  Helpers and such
     /////////////////////////////////////
     findGameFromSenderGuid(guid){
         const game = this.games.find(game => game.players.find(player => player.guid === guid))
@@ -196,6 +187,50 @@ class Server{
         }
 
         return game
+    }
+
+    /**
+     * Syncs game data
+     * @param {FtRequest} ft
+     * @returns {FtRequestData}
+     */
+    sync(ft){
+        logger.log('game', `${ft.Data.SenderName} is syncing...`)
+
+        const game = this.findGameFromSenderGuid(ft.Data.SenderGuid)
+
+        if(game){
+            const response = game.handleRequest(ft)
+            logger.log('pass', `${ft.Data.SenderName} sync succeeded`)
+            return response
+        }
+        else{
+            logger.log('error', `${ft.Data.SenderName} sync failed`)
+            return { Error: 'Could not sync. Could not find a game' }
+        }
+    }
+
+    /**
+     * Creates a new game with that games GUID being the GUID
+     * of the player that created it
+     * @param {FtRequest} ft 
+     * @returns {FtRequestData}
+     */
+    createGame(ft){
+        logger.log('game', `${ft.Data.SenderName} is requesting to create a game...`)
+
+        const game = new Game(ft.Data.SenderGuid, ft.Data.SenderName)
+        this.games.push(game)
+        game.addPlayer(ft.Data.SenderGuid, ft.Data.SenderName)
+
+        logger.log('game', `${ft.Data.SenderName} created game successfully`)
+
+        const data = new FtRequestData({
+            SenderGuid: ft.Data.SenderGuid,
+            Success:    'created game successfully'
+        })
+
+        return data
     }
 }
 

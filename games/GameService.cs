@@ -24,7 +24,7 @@ public class GameService
 
     public async Task<FtRequestData> JoinGame()
     {
-        FtRequest request = new FtRequest(FtRequestType.CreateGame, new FtRequestData()
+        FtRequest request = new FtRequest(FtRequestType.JoinGame, new FtRequestData()
         {
             SenderGuid = OS.GetUniqueId(),
             SenderName = System.Environment.MachineName
