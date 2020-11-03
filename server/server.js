@@ -6,6 +6,7 @@ const { logger }                    = require('./logger')
 const { Game }                      = require('./game')
 const {Mock}                        = require('./mock')
 const { FtRequest, FtRequestData }  = require('./requests')
+const { Bus }                       = require('./bus')
 
 const jsonParser = bodyParser.json()
 
@@ -15,6 +16,7 @@ class Server{
         this.requests           = []
         this.games              = []
         this.app                = express()
+        this.bus                = new Bus()
         this.initializeRoutes()
         this.mock               = new Mock(this)
     }
@@ -28,6 +30,7 @@ class Server{
                 logger.log('info', key + ':\t\t' + ipInfo[key])
             }
         })
+        this.bus.emit('started')
     }
 
     handle(handler, ...args){
@@ -152,23 +155,7 @@ class Server{
         // This will just join the first avaliable game
         const ft = new FtRequest(req.body)
 
-        const data = new FtRequestData({
-            SenderGuid: ft.Data.SenderGuid
-        })  
-
-        logger.log('game', `${ft.Data.SenderGuid} is looking for a game to join...`)
-
-        const game = server.games.find(game => game.players.length < 2)
-
-        if(game){
-            game.addPlayer(ft.Data.SenderGuid)
-            logger.log('game', `${ft.Data.SenderGuid} joined game (${game.guid})`)
-            data.Success = 'Found a game to join'
-        }
-        else{
-            logger.log('game', 'could not find any avaliable games')
-            data.Error = 'Could not find a game to join'
-        }
+        const data = server.joinGame(ft)
 
         res.send(JSON.stringify(data))
     }
@@ -229,6 +216,35 @@ class Server{
             SenderGuid: ft.Data.SenderGuid,
             Success:    'created game successfully'
         })
+
+        this.bus.emit('create-game', game)
+        return data
+    }
+
+    /**
+     * Joins the first avaliable game with less than two players
+     * @param {FtRequest} ft 
+     * @returns {FtRequestData}
+     */
+    joinGame(ft){
+        const data = new FtRequestData({
+            SenderGuid: ft.Data.SenderGuid
+        })  
+
+        logger.log('game', `${ft.Data.SenderGuid} is looking for a game to join...`)
+
+        const game = this.games.find(game => game.players.length < 2)
+
+        if(game){
+            const player = game.addPlayer(ft.Data.SenderGuid, ft.Data.SenderName)
+            logger.log('game', `${ft.Data.SenderGuid} joined game (${game.guid})`)
+            data.Success = 'Found a game to join'
+            this.bus.emit('join-game', game, player)
+        }
+        else{
+            logger.log('game', 'could not find any avaliable games')
+            data.Error = 'Could not find a game to join'
+        }
 
         return data
     }

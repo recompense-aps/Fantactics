@@ -41,6 +41,7 @@ class Game{
         // add data to other players that they will need to sync
         otherPlayers.forEach(player => {
             if(data.UnitActions)
+                logger.log('game', `Player '${player.name}' had ${data.UnitActions.length} unit actions added to sync queue`)
                 player.toSync.UnitActions.push(...data.UnitActions)
             if(data.Notifications)
                 player.toSync.Notifications.push(...data.Notifications)
@@ -60,7 +61,9 @@ class Game{
     }
 
     addPlayer(guid, name){
-        this.players.push(new Player(guid, name));
+        const player = new Player(guid, name)
+        this.players.push(player);
+        return player
     }
 }
 

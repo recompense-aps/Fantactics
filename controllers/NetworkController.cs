@@ -28,10 +28,16 @@ public class NetworkController : Controller
         Global.Log(response.ToJson());
 
         // transform unit actions
-        List<UnitAction> actions = UnitAction.TransformFromJson( response.UnitActions.Cast<JsonElement>().ToList() );
+        List<JsonElement> elems = response.UnitActions.Cast<JsonElement>().ToList();
 
-        // replay the unit actions
-        actions.ForEach(async action => await action.Replay());
+        // transform and replay the unit actions
+        foreach (JsonElement elem in elems)
+        {
+            UnitAction action = UnitAction.ActionFromJson(elem);
+
+            await action.Replay();
+            await Global.WaitFor(1);
+        }
     }
 
     private async void SpawnUnit()

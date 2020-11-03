@@ -55,6 +55,32 @@ public abstract class UnitAction
 
         return actions;
     }
+
+    public static UnitAction ActionFromJson(JsonElement elem)
+    {
+        JsonElement jsonData = elem.GetProperty(nameof(JsonData));
+            string unitGuid = elem.GetProperty(nameof(UnitGuid)).GetString();
+            string unitActionType = jsonData.GetProperty("UnitActionType").GetString(); 
+            switch(unitActionType)
+            {
+                case nameof(MoveAction):
+                    return MoveAction.FromJson(unitGuid, jsonData);
+
+                case nameof(FightAction):
+                    return FightAction.FromJson(unitGuid, jsonData);
+
+                case nameof(SpawnAction):
+                    return SpawnAction.FromJson(unitGuid, jsonData);
+
+                case nameof(DieAction):
+                    // Do nothing for now. If a unit dies, it was probably the
+                    // result of some other action (fight, etc)
+                    // therefore, we don't need to DieAction because it will happen
+                    // automatically
+                default:
+                    throw Global.Error(string.Format("{0} is not a valid UnitActionType", unitActionType));
+            }
+    }
 }
 
 public class MoveAction : UnitAction
