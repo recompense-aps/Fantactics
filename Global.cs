@@ -3,7 +3,11 @@ using System;
 using System.Threading.Tasks;
 public class Global : Node
 {
+    [Signal]
+    public delegate void ActiveMapChanged(Map map);
     public static Global Instance{get; private set;}
+    public static GlobalConfig Config{get; } = new GlobalConfig();
+    public static EventBus Bus{get;} = new EventBus();
     public static HttpRequestManager Http {get;} = new HttpRequestManager();
     public static Map ActiveMap{get; set;}
     public static Controller LocalController { get; set; }
@@ -26,6 +30,7 @@ public class Global : Node
         Instance.AddChild(t);
         return t.ToSignal(t, "timeout");
     }
+
     public override void _Ready()
     {
         Instance = this;
@@ -35,6 +40,12 @@ public class Global : Node
     {
         node.QueueFree();
     }
+}
+
+public class GlobalConfig
+{
+    public int WindowWidth{get;} = 1920;
+    public int WindowHeight{get;} = 1080;
 }
 
 public class HttpRequestManager : Godot.Object
@@ -62,7 +73,8 @@ public class HttpRequestManager : Godot.Object
            request.GetHttpClientStatus() == HTTPClient.Status.ConnectionError ||
            request.GetHttpClientStatus() == HTTPClient.Status.CantConnect)
         {
-            // timed out, log the error
+            // timed out, log the error and kill the request
+            BasicPopup.Notify("Could not connect to server! Connection timed out");
             Global.Error(string.Format("Request to {0} timed out after {1} second(s)", url, timeout));
             request.QueueFree();
         }
@@ -110,5 +122,30 @@ public class HttpResponse
             [RAW RESPONSE]
             {5}
         ", Url, Result, ResponseCode, string.Join(";\n\t\t", Headers), Body, string.Join(" ", RawResponse));
+    }
+}
+
+public class EventBus
+{
+    public EventBus On(string signal, Godot.Object target, string methodName)
+    {
+        if(!Global.Instance.HasUserSignal(signal))
+        {
+            Global.Instance.AddUserSignal(signal);
+        }
+
+        Global.Instance.Connect(signal, target, methodName);
+
+        return this;
+    }
+
+    public EventBus Emit(string signal, params object[] args)
+    {
+        if(Global.Instance.HasUserSignal(signal))
+        {
+            Global.Instance.EmitSignal(signal, args);
+        }
+        
+        return this;
     }
 }

@@ -15,7 +15,7 @@ public class GameService
             SenderName = System.Environment.MachineName
         });
 
-        HttpResponse response = await Global.Http.Request(Route("create-game"), 5000, request.ToJson());
+        HttpResponse response = await Global.Http.Request(Route("create-game"), 5, request.ToJson());
         Global.Log(response.Body);
         FtRequestData data = JsonSerializer.Deserialize<FtRequestData>(response.Body);
 
@@ -30,7 +30,7 @@ public class GameService
             SenderName = System.Environment.MachineName
         });
 
-        HttpResponse response = await Global.Http.Request(Route("join-game"), 5000, request.ToJson());
+        HttpResponse response = await Global.Http.Request(Route("join-game"), 5, request.ToJson());
         FtRequestData data = JsonSerializer.Deserialize<FtRequestData>(response.Body);
 
         return data;
@@ -48,7 +48,7 @@ public class GameService
         string json = request.ToJson();
         Global.Log(json);
 
-        HttpResponse response = await Global.Http.Request(Route("sync"), 5000, json);
+        HttpResponse response = await Global.Http.Request(Route("sync"), 5, json);
         Global.Log(response.Body);
         FtRequestData data = JsonSerializer.Deserialize<FtRequestData>(response.Body);
 

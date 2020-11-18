@@ -5,6 +5,8 @@ using System.Linq;
 
 public class Map : Node2D
 {
+    public delegate void MapChanged(Map map);
+    public delegate void LookingForMap();
     public GameTile ActiveTile {get; private set;}
     private TileMap environmentMap;
     private TileMap highlightMap;
@@ -16,7 +18,8 @@ public class Map : Node2D
         environmentMap = GetNode<TileMap>("EnvironmentMap");
         highlightMap = GetNode<TileMap>("HighlightMap");
         debugLabel = GetNode<Label>("Debug/DebugText");
-        Global.ActiveMap = this;
+        Global.Bus.Emit(nameof(MapChanged), this)
+                  .On(nameof(LookingForMap), this, nameof(OnLookingForMap));
     }
 
     public override void _Process(float delta)
@@ -155,6 +158,11 @@ public class Map : Node2D
         }
 
         highlightMap.SetCell((int)tile.x, (int)tile.y, (int)CellHighlight.Yellow);
+    }
+
+    private void OnLookingForMap()
+    {
+        Global.Bus.Emit(nameof(MapChanged), this);
     }
 
     private void _on_Map_tree_exiting()
