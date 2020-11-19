@@ -16,7 +16,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Fantactics"
-run/main_scene="res://lobby/SimpleLobby.tscn"
+run/main_scene="res://games/LocalGame.tscn"
 config/icon="res://icon.png"
 
 [autoload]

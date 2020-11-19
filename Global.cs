@@ -42,6 +42,8 @@ public class Global : Node
     }
 }
 
+public enum RaceType{ Undead, Wizards }
+
 public class GlobalConfig
 {
     public int WindowWidth{get;} = 1920;

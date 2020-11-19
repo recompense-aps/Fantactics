@@ -20,23 +20,34 @@ public class Map : Node2D
         debugLabel = GetNode<Label>("Debug/DebugText");
         Global.Bus.Emit(nameof(MapChanged), this)
                   .On(nameof(LookingForMap), this, nameof(OnLookingForMap));
+        Global.ActiveMap = this; // TODO decouple this
     }
 
     public override void _Process(float delta)
+    {
+        ProcessActiveTile();
+    }
+
+    private void ProcessActiveTile()
     {
         Vector2 mouse = GetTree().Root.GetMousePosition();
         Vector2 tile = environmentMap.WorldToMap(mouse);
         Vector2 worldPosition = environmentMap.MapToWorld(tile);
         int cell = environmentMap.GetCell((int)tile.x, (int)tile.y);
-        string name = environmentMap.TileSet.TileGetName(cell);
 
-        ActiveTile = new GameTile(worldPosition + halfCell, tile, name);
+        if(cell != -1)
+        {
+            string name = environmentMap.TileSet.TileGetName(cell);
 
-        debugLabel.Text = string.Format(@"
-            Mouse at:   {0}
-            TileId:     {1}
-            Tile:       {2}
-        ", tile, cell, name);
+            ActiveTile = new GameTile(worldPosition + halfCell, tile, name);
+
+            debugLabel.Text = string.Format(@"
+                Mouse at:   {0}
+                TileId:     {1}
+                Tile:       {2}
+            ", tile, cell, name);
+        }
+
     }
 
     public Vector2 GetWorldPositionFromCell(Vector2 cellPosition)

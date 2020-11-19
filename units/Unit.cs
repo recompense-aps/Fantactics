@@ -36,6 +36,8 @@ public class Unit : Area2D
     public GameTile GameBoardPosition{get; private set;}
     public StateManager<Unit> State {get; private set;}
     private HpDisplay hpDisplay;
+    private ColorTag colorTag;
+    private Map map;
     private bool wasPressed = false;
     public List<UnitAction> Actions {get; private set;} = new List<UnitAction>();
 
@@ -89,8 +91,10 @@ public class Unit : Area2D
         Guid = Guid ?? GetInstanceId().ToString();
         State = new StateManager<Unit>();
         hpDisplay = HpDisplay.Scene.Instance();
+        colorTag = ColorTag.Scene.Instance();
         AddChild(State);
         AddChild(hpDisplay);
+        AddChild(colorTag);
         Connect("input_event", this, nameof(OnInputEvent));
         SetStats();
         SetAbilities();
@@ -120,6 +124,7 @@ public class Unit : Area2D
     {
         UnitController = controller;
         Guid = controller.Guid + "|" + GetInstanceId();
+        colorTag.SetColor(controller.Color);
     }
 
     public bool HasSameController(Unit otherUnit)

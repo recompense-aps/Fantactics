@@ -4,8 +4,10 @@ using System.Linq;
 
 public class Controller : Node
 {
-    public bool HasInitiative {get; set;}
+    public bool HasInitiative {get; set;} = false;
+    public Color Color {get; set;}
     public string Guid {get; protected set;}
+    public RaceType Race {get; set;}
     public List<Unit> Units
     {
         get
@@ -17,7 +19,12 @@ public class Controller : Node
     }
     public override void _Ready()
     {
-        Guid = OS.GetUniqueId();
+        InitializeController();
+    }
+
+    public virtual void InitializeController(string guid = "")
+    {
+        Guid = OS.GetUniqueId() + guid;
     }
 
     protected List<object> GetAllUnitActions()
