@@ -28,7 +28,7 @@ public class Unit : Area2D
     public int Attack{get; protected set;}          = 1;
     public int Defense{get; protected set;}         = 1;
     public int Hp{get; protected set;}              = 1;
-    public int Speed{get; protected set;}           = 2;
+    public int Speed{get; protected set;}           = 4;
     public int AttackRange{get; protected set;}     = 1;
 
     public string Guid{get; set;}
@@ -109,6 +109,7 @@ public class Unit : Area2D
         AddToGroup("units");
 
         SpawnAction();
+        State.Change<BasicIdleState>();
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -117,7 +118,7 @@ public class Unit : Area2D
     public void SetGamePosition(Vector2 position)
     {
         Position = Global.ActiveMap.GetWorldPositionFromCell(position);
-        GameBoardPosition = Global.ActiveMap.GetCellAt(position);
+        GameBoardPosition = Global.ActiveMap.GetTileAt(position);
     }
 
     public void SetController(Controller controller)
@@ -131,11 +132,6 @@ public class Unit : Area2D
     {
         return UnitController == null ||                    // Just for prototype testing
                otherUnit.UnitController == UnitController;
-    }
-
-    public bool CanMoveTo(Vector2 gameBoardPosition)
-    {
-        return gameBoardPosition.BoardDistance(GameBoardPosition.BoardPosition) <= Speed;
     }
 
     public void RecordAction(UnitAction action)
@@ -179,7 +175,7 @@ public class Unit : Area2D
         t2.InterpolateProperty(this, "position", new Vector2(point.x, Position.y), new Vector2(point.x, point.y), 0.25f, Tween.TransitionType.Linear, Tween.EaseType.InOut, 0.26f);
         t.Start();
         t2.Start();
-        GameBoardPosition = Global.ActiveMap.GetCellAt(Global.ActiveMap.GetBoardPositionFromWorldPosition(point));
+        GameBoardPosition = Global.ActiveMap.GetTileAt(Global.ActiveMap.GetBoardPositionFromWorldPosition(point));
         await ToSignal(t2, "tween_completed");
         EmitSignal(nameof(FinishedMoving));
         RecordAction(new MoveAction(this, point));
@@ -257,6 +253,11 @@ public class Unit : Area2D
     ////////////////////////////////////////////////////////////////////
     //  Other public virtual methods
     ////////////////////////////////////////////////////////////////////
+    public virtual bool CanMoveTo(Vector2 gameBoardPosition)
+    {
+        return gameBoardPosition.BoardDistance(GameBoardPosition.BoardPosition) <= Speed;
+    }
+
     public virtual SignalAwaiter ApplyCombatEffect(Unit otherUnit)
     {
         // default filler thing

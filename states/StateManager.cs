@@ -30,6 +30,11 @@ public class StateManager<T> : Node where T:Node
         ChangeTo(state);
     }
 
+    public bool Is<U>() where U:State<T>
+    {
+        return Current is U;
+    }
+
     public void Revert()
     {
         if(history.Count > 0)

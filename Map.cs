@@ -60,7 +60,7 @@ public class Map : Node2D
         return environmentMap.WorldToMap(worldPosition);
     }
 
-    public GameTile GetCellAt(Vector2 gameBoardPosition)
+    public GameTile GetTileAt(Vector2 gameBoardPosition)
     {
         int cell = environmentMap.GetCell((int)gameBoardPosition.x, (int)gameBoardPosition.y);
         string name = environmentMap.TileSet.TileGetName(cell);
@@ -104,7 +104,7 @@ public class Map : Node2D
         IEnumerable<Unit> q = 
             from    unit in units
             where   unit.GameBoardPosition != null && 
-                    unit.GameBoardPosition.IsSameTile(GetCellAt(gameBoardPosition))
+                    unit.GameBoardPosition.IsSameTile(GetTileAt(gameBoardPosition))
             select  unit;
 
         return q.Count() != 0;
@@ -182,11 +182,33 @@ public class Map : Node2D
     }
 }
 
-public class GameTile
+public class GameTile : Godot.Object
 {
     public Vector2 WorldPosition {get; private set;}
     public Vector2 BoardPosition {get; private set;}
     public string Name {get; set;}
+    public bool HasUnit
+    {
+        get
+        {
+            return Global.ActiveMap.CellHasUnit(BoardPosition);
+        }
+    }
+    public Unit Unit
+    {
+        get
+        {
+            if(HasUnit)
+            {
+                return Global.ActiveMap.GetUnitAt(BoardPosition);
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+    
     public GameTile(Vector2 worldPosition, Vector2 boardPosition, string name)
     {
         WorldPosition = worldPosition;

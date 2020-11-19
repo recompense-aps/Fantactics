@@ -37,13 +37,7 @@ public class BasicAttackingState : State<Unit>
         await ToSignal(Slave, nameof(Unit.FinishedFighting));
         Global.Log("Finished fighting");
 
-        // done now, revert all units state
-        Unit.All
-            .Where(unit => unit.GetInstanceId() != Slave.GetInstanceId())
-            .ToList()
-            .ForEach(unit => unit.State.Revert());
-
-        // revert our attacking unit
-        Manager.Change<BasicIdleOnTurnState>();
+        // unit is done with turn
+        Manager.Change<BasicFinishedTurnState>();
     }
 }

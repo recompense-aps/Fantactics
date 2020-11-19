@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Global.cs" type="Script" id=1]
 [ext_resource path="res://BasicPopup.tscn" type="PackedScene" id=2]
+[ext_resource path="res://ui/UnitActionDialogue.tscn" type="PackedScene" id=3]
+[ext_resource path="res://ui/TurnStartScreen.tscn" type="PackedScene" id=4]
 
 [node name="Node" type="Node"]
 script = ExtResource( 1 )
@@ -12,3 +14,9 @@ margin_top = 79.0
 margin_right = 580.0
 margin_bottom = 137.0
 window_title = ""
+
+[node name="UnitActionDialogue" parent="." instance=ExtResource( 3 )]
+visible = false
+
+[node name="TurnStartScreen" parent="." instance=ExtResource( 4 )]
+visible = false

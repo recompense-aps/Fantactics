@@ -7,42 +7,33 @@ public class BasicSelectedState : State<Unit>
     protected override void OnStateStarted()
     {
         base.OnStateStarted();
-        Unit.All
-            .Where(u => u.GetInstanceId() != Slave.GetInstanceId())
-            .ToList()
-            .ForEach(u => u.State.Change<BasicIdleState>());
 
         Global.ActiveMap.HighlightTiles(Slave.Position, Slave.Speed, CellHighlight.Green);
         Global.ActiveMap.GetUnitsInArea(Slave.GameBoardPosition.BoardPosition, Slave.Speed + Slave.AttackRange)
               .ToList()
               .ForEach(unit => Global.ActiveMap.HighlightTile(unit.GameBoardPosition.BoardPosition, CellHighlight.Red));
+        Global.UnitActionDialogue.Connect(nameof(UnitActionDialogue.SelectedCancel), this, nameof(OnSelectedCancel));
+        Global.UnitActionDialogue.Connect(nameof(UnitActionDialogue.SelectedWait), this, nameof(OnSelectedWait));
+        Global.UnitActionDialogue.Connect(nameof(UnitActionDialogue.SelectedAttack), this, nameof(OnSelectedAttack));
+    }
+
+    protected override void OnStateFinished()
+    {
+        base.OnStateFinished();
     }
 
     public override void _Process(float delta)
     {
-        if(Input.IsMouseButtonPressed((int)ButtonList.Left))
+        if(Input.IsMouseButtonPressed((int)ButtonList.Left) && !Global.UnitActionDialogue.IsOpen)
         {
-            if(Global.ActiveMap.ActiveTile.IsSameTile(Slave.GameBoardPosition))
-            {
-                return;
-            }
-
-            Global.ActiveMap.UnHighlight(CellHighlight.Green);
-            Global.ActiveMap.UnHighlight(CellHighlight.Red);
-            
-            if(Global.ActiveMap.ActiveTile.IsWithin(Slave.GameBoardPosition, Slave.Speed) && !Global.ActiveMap.CellHasUnit(Global.ActiveMap.ActiveTile.BoardPosition))
-            {
-                MoveUnit(Global.ActiveMap.ActiveTile.WorldPosition);
-            }
-            else if(Global.ActiveMap.CellHasUnit(Global.ActiveMap.ActiveTile.BoardPosition) && Global.ActiveMap.ActiveTile.IsWithin(Slave.GameBoardPosition, Slave.Speed + Slave.AttackRange))
-            {
-                Attack();
-            }
-            else
-            {
-                Unit.All.ForEach(unit => unit.State.Revert());
-            }
+            Global.UnitActionDialogue.OpenAtMouse(Slave);
         }
+    }
+
+    private void UnHighlightCells()
+    {
+        Global.ActiveMap.UnHighlight(CellHighlight.Green);
+        Global.ActiveMap.UnHighlight(CellHighlight.Red);
     }
 
     private async void MoveUnit(Vector2 position, Action afterMove = null)
@@ -51,18 +42,31 @@ public class BasicSelectedState : State<Unit>
 
         await ToSignal(Slave, nameof(Unit.FinishedMoving));
 
-        Unit.All
-            .Where(unit => unit.GetInstanceId() != Slave.GetInstanceId())
-            .ToList()
-            .ForEach(unit => unit.State.Revert());
-
-        // reset the slave
-        Manager.Change<BasicIdleOnTurnState>();
+        // moved, turn is over
+        Manager.Change<BasicFinishedTurnState>();
     }
 
-    private void Attack()
+    private void Attack(GameTile actionedTile)
     {
-        Manager.Mutate("tileToAttack", Global.ActiveMap.ActiveTile);
+        Manager.Mutate("tileToAttack", actionedTile);
         Manager.Change<BasicAttackingState>();
+    }
+
+    private void OnSelectedCancel(GameTile actionedTile)
+    {
+        UnHighlightCells();
+        Unit.All.ForEach(unit => unit.State.Revert());
+    }
+    private void OnSelectedWait(GameTile actionedTile)
+    {
+        // move here
+        UnHighlightCells();
+        MoveUnit(actionedTile.WorldPosition);
+    }
+    private void OnSelectedAttack(GameTile actionedTile)
+    {
+        // move and attack
+        UnHighlightCells();
+        Attack(actionedTile);
     }
 }

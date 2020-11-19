@@ -29,7 +29,7 @@ public class GamePieceComponent : Node
         slave.Position = map.GetWorldPositionFromCell(v);
 
         // set the tile at that position
-        Tile = map.GetCellAt(v);
+        Tile = map.GetTileAt(v);
     }
 
     private void OnMapChanged(Map newMap)

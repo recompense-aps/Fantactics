@@ -11,6 +11,8 @@ public class Global : Node
     public static HttpRequestManager Http {get;} = new HttpRequestManager();
     public static Map ActiveMap{get; set;}
     public static Controller LocalController { get; set; }
+    public static UnitActionDialogue UnitActionDialogue{get; set;}
+    public static TurnStartScreen TurnStartScreen{get; set;}
     public static void Log(object message)
     {
         GD.Print(message);
@@ -34,6 +36,8 @@ public class Global : Node
     public override void _Ready()
     {
         Instance = this;
+        UnitActionDialogue = GetNode<UnitActionDialogue>("UnitActionDialogue");
+        TurnStartScreen = GetNode<TurnStartScreen>("TurnStartScreen");
     }
 
     public void RemoveNode(Node node)
