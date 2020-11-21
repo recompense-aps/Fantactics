@@ -3,7 +3,13 @@ using System;
 
 public class GamePieceComponent : Node
 {
-    public GameTile Tile {get; private set;}
+    public GameTile Tile 
+    {
+        get
+        {
+            return Global.ActiveMap.GetTileAt(Global.ActiveMap.GetBoardPositionFromWorldPosition(slave.Position));
+        }
+    }
     private Node2D slave;
     private Map map;
 
@@ -22,14 +28,7 @@ public class GamePieceComponent : Node
 
     public void SnapToGrid()
     {
-        // get closest board position
-        Vector2 v = map.GetBoardPositionFromWorldPosition(slave.Position);
-
-        // set the world position to corresponding board position
-        slave.Position = map.GetWorldPositionFromCell(v);
-
-        // set the tile at that position
-        Tile = map.GetTileAt(v);
+        slave.Position = new Vector2(Tile.WorldPosition);
     }
 
     private void OnMapChanged(Map newMap)

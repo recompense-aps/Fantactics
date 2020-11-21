@@ -1,5 +1,5 @@
 using Godot;
-using System;
+using System.Collections.Generic;
 
 public class LocalGame : Game
 {
@@ -15,15 +15,34 @@ public class LocalGame : Game
         Player2.ControllerName = "Player 2";
         Player1.Connect(nameof(Controller.TurnEnded), this, nameof(OnPlayer1FinishedTurn));
         Player2.Connect(nameof(Controller.TurnEnded), this, nameof(OnPlayer2FinishedTurn));
-
         Global.Instance.AddChild(Player1);
         Global.Instance.AddChild(Player2);
 
-        Unit u = Unit.SpawnWithUnitName(nameof(Zombie), new Vector2(400, 400));
-        u.SetController(Player1);
+        List<SpawnGroup> player1Units = new List<SpawnGroup>()
+        {
+            new SpawnGroup()
+            {
+                UnitType = nameof(Zombie),
+                BoardPosition = new Vector2(2,2)
+            },
+            new SpawnGroup()
+            {
+                UnitType = nameof(Zombie),
+                BoardPosition = new Vector2(4,4)
+            }
+        };
 
-        Unit u1 = Unit.SpawnWithUnitName(nameof(Zombie), new Vector2(200, 200));
-        u1.SetController(Player2);
+        List<SpawnGroup> player2Units = new List<SpawnGroup>()
+        {
+            new SpawnGroup()
+            {
+                UnitType = nameof(Pupil),
+                BoardPosition = new Vector2(22,14)
+            }
+        };
+
+        player1Units.ForEach(group => group.Spawn(Player1));
+        player2Units.ForEach(group => group.Spawn(Player2));
 
         Player1.StartTurn();
     }
@@ -39,4 +58,16 @@ public class LocalGame : Game
         await Global.WaitFor(2);
         Player1.StartTurn();
     }
+}
+class SpawnGroup
+{
+    public string UnitType {get; set;}
+    public Vector2 BoardPosition{get; set;}
+
+    public void Spawn(Controller c)
+    {
+        Unit u = Unit.SpawnAt(UnitType, BoardPosition);
+        u.SetController(c);
+    }
+
 }

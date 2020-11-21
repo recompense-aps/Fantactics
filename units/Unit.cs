@@ -73,6 +73,11 @@ public class Unit : Area2D
             case nameof(Zombie):
                 unit = Zombie.Scene.Instance();
                 break;
+            case nameof(Pupil):
+                unit = Pupil.Scene.Instance();
+                break;
+            default:
+                throw Global.Error(string.Format("Cannot spawn unit type '{0}' it is not a valid unit type", unitName));
         }
 
         if(unit != null)
@@ -81,6 +86,12 @@ public class Unit : Area2D
         }
 
         return unit;
+    }
+
+    public static Unit SpawnAt(string unitName, Vector2 boardPosition)
+    {
+        Vector2 worldPosition = Global.ActiveMap.GetWorldPositionFromCell(boardPosition);
+        return SpawnWithUnitName(unitName, worldPosition);
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -246,7 +257,7 @@ public class Unit : Area2D
         EmitSignal(nameof(StartedDying));
         await Kill();
         EmitSignal(nameof(FinishedDying));
-        //QueueFree();
+        QueueFree();
         // TODO: Some sort of dead state for later clean up
     }
     
