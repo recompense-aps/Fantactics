@@ -20,3 +20,5 @@ visible = false
 
 [node name="TurnStartScreen" parent="." instance=ExtResource( 4 )]
 visible = false
+
+[node name="UILayer" type="CanvasLayer" parent="."]

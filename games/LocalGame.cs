@@ -44,6 +44,11 @@ public class LocalGame : Game
         player1Units.ForEach(group => group.Spawn(Player1));
         player2Units.ForEach(group => group.Spawn(Player2));
 
+        Building pit = Building.SpawnAt(nameof(Pit), new Vector2(1,1));
+        pit.Controller = Player1;
+        Building uni = Building.SpawnAt(nameof(University), new Vector2(23, 15));
+        uni.Controller = Player2;
+
         Player1.StartTurn();
     }
 

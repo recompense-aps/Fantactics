@@ -7,6 +7,40 @@ public class Building : Area2D
     private GamePieceComponent gamePiece;
     private ClickableComponent clickable;
 
+    public static Building Spawn(Building building, Vector2 worldPosition)
+    {
+        building.GlobalPosition = worldPosition;
+        Global.Instance.AddChild(building);
+        return building;
+    }
+
+    public static Building SpawnWithName(string buildingName, Vector2 worldPosition)
+    {
+        Building building = null;
+        switch(buildingName)
+        {
+            case nameof(University):
+                building = University.Scene.Instance();
+                break;
+            case nameof(Pit):
+                building = Pit.Scene.Instance();
+                break;
+        }
+
+        if(building != null)
+        {
+            return Spawn(building, worldPosition);
+        }
+
+        return building;
+    }
+
+    public static Building SpawnAt(string unitName, Vector2 boardPosition)
+    {
+        Vector2 worldPosition = Global.ActiveMap.GetWorldPositionFromCell(boardPosition);
+        return SpawnWithName(unitName, worldPosition);
+    }
+
     public override void _Ready()
     {
         gamePiece = new GamePieceComponent();

@@ -10,23 +10,12 @@ public class BaseWindow : Node2D
 
     public virtual float Width => 500;
     public virtual float Height => 700;
-    public Control Content {get; protected set;}
-
     public override void _Ready()
     {
         // Each UI component will be added to the global singleton instance,
         // so they need to be hidden by default
         Hide();
-
-        // Content is the root of the actual UI.
-        // Height and width are constant
-        Content = new Control();
-        Content.RectSize = new Vector2(Width, Height);
-        AddChild(Content);
-        InitializeContent();
     }
-
-    public virtual void InitializeContent(){}
 
     /// <summary>
     /// Opens the window and returns a signal awaiter object that can
@@ -76,7 +65,7 @@ public class BaseWindow : Node2D
     protected virtual SignalAwaiter AnimateOpening()
     {
         Tween openTween = new Tween();
-        openTween.InterpolateProperty(Content, "modulate", new Color(Modulate.r, Modulate.g, Modulate.b, 0), new Color(Modulate.r, Modulate.g, Modulate.b, 1), 1);
+        openTween.InterpolateProperty(this, "modulate", new Color(Modulate.r, Modulate.g, Modulate.b, 0), new Color(Modulate.r, Modulate.g, Modulate.b, 1), 1);
         AddChild(openTween);
         openTween.Start();
         return ToSignal(openTween, "tween_completed");
@@ -85,7 +74,7 @@ public class BaseWindow : Node2D
     protected virtual SignalAwaiter AnimateClosing()
     {
         Tween openTween = new Tween();
-        openTween.InterpolateProperty(Content, "modulate", new Color(Modulate.r, Modulate.g, Modulate.b, 1), new Color(Modulate.r, Modulate.g, Modulate.b, 0), 1);
+        openTween.InterpolateProperty(this, "modulate", new Color(Modulate.r, Modulate.g, Modulate.b, 1), new Color(Modulate.r, Modulate.g, Modulate.b, 0), 1);
         AddChild(openTween);
         openTween.Start();
         return ToSignal(openTween, "tween_completed");
