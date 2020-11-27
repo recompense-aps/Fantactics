@@ -3,6 +3,8 @@ using System;
 
 public class ClickableComponent : Node
 {
+    public static SceneWrapper<ClickableComponent> Scene = new SceneWrapper<ClickableComponent>("res://components/ClickableComponent.tscn");
+
     [Signal]
     public delegate void Clicked();
 
@@ -11,7 +13,10 @@ public class ClickableComponent : Node
 
     public override void _Ready()
     {
-        
+        Global.Log("sdfgsdfgsdf");
+        slave = GetParent() as Area2D;
+        slave.Connect("input_event", this, nameof(OnInputEvent));
+        BasicPopup.Notify("Heloooo");
     }
 
     private void OnInputEvent(Node viewport, InputEvent inputEvent, int shape)

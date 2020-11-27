@@ -50,8 +50,8 @@ public enum RaceType{ Undead, Wizards }
 
 public class GlobalConfig
 {
-    public int WindowWidth{get;} = 1920;
-    public int WindowHeight{get;} = 1080;
+    public int WindowWidth{get;} = 1600;
+    public int WindowHeight{get;} = 1000;
 }
 
 public class HttpRequestManager : Godot.Object

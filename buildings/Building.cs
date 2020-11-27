@@ -44,7 +44,7 @@ public class Building : Area2D
     public override void _Ready()
     {
         gamePiece = new GamePieceComponent();
-        clickable = new ClickableComponent();
+        clickable = ClickableComponent.Scene.Instance();
 
         AddChild(gamePiece);
         AddChild(clickable);
@@ -58,7 +58,14 @@ public class Building : Area2D
     ///////////////////////////////////
     public virtual void ShowMenu()
     {
+        Global.Log("Here we goooo.");
         BasicPopup.Notify("Building clicked");
+    }
+
+    public virtual void HoverEffect(bool toggle)
+    {
+        float alpha = toggle ? 0.5f : 1;
+        Modulate = new Color(1, 1, 1, alpha);
     }
 
     ///////////////////////////////////
