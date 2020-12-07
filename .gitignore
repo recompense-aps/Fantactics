@@ -1,6 +1,9 @@
 # vs code stuff
 .vscode/
 
+# docs is a seperate repo
+docs/
+
 # Godot-specific ignores
 .import/
 export.cfg

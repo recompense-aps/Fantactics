@@ -1,0 +1,14 @@
+Map.Active.Board.CellAt(1, 2);
+
+Map.Active.World.CellAt(334, 555);
+
+map = Map.Active;
+
+map.Board.CellAt(1,2).Unit
+map.Board.Path(unit.Position)
+		 .To(otherPosition)
+		 .Weight(unit)
+
+
+class GameBoardMapAbstraction{}
+class WorldMapAbstraction{}
