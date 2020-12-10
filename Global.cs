@@ -3,20 +3,20 @@ using System;
 using System.Threading.Tasks;
 public class Global : Node
 {
-    [Signal]
-    public delegate void ActiveMapChanged(Map map);
     public static Global Instance{get; private set;}
     public static GlobalConfig Config{get; } = new GlobalConfig();
-    public static EventBus Bus{get;} = new EventBus();
     public static HttpRequestManager Http {get;} = new HttpRequestManager();
+
     public static Map ActiveMap{get; set;}
     public static Controller LocalController { get; set; }
     public static UnitActionDialogue UnitActionDialogue{get; set;}
     public static TurnStartScreen TurnStartScreen{get; set;}
+
     public static void Log(object message)
     {
         GD.Print(message);
     }
+	
     public static Exception Error(object message)
     {
         GD.PrintErr(message);
