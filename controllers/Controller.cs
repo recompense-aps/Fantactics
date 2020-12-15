@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,6 +7,9 @@ public class Controller : Node
 {
     [Signal]
     public delegate void TurnEnded();
+	[Signal]
+	public delegate void TurnStarted();
+
     public bool HasInitiative {get; set;} = false;
     public Color Color {get; set;}
     public string Guid {get; protected set;}
@@ -35,7 +39,7 @@ public class Controller : Node
 
     public void StartTurn()
     {
-        Global.TurnStartScreen.Open(ControllerName);
+        EmitSignal(nameof(TurnStarted));
         Units.ForEach(unit => unit.State.Change<BasicIdleOnTurnState>());
         HasInitiative = true;
     }
@@ -49,7 +53,7 @@ public class Controller : Node
 
     public virtual void InitializeController(string guid = "")
     {
-        Guid = OS.GetUniqueId() + guid;
+        Guid = GenerateGuid() + guid;
     }
 
     protected List<object> GetAllUnitActions()
@@ -63,4 +67,9 @@ public class Controller : Node
         Global.Log(actions.Count);
         return actions;
     }
+
+	private string GenerateGuid()
+	{
+		return Guid.NewGuid().ToString();
+	}
 }
