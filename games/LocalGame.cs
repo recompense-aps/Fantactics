@@ -52,6 +52,23 @@ public class LocalGame : Game
 		Player1.StartTurn();
 	}
 
+	private void SetUpUnits()
+	{
+		Spawner.WithBoard(new object());
+		Spawner.Spawn("Zombie")
+			   .At(2, 2)
+			   .In(Global.Instance)
+			   .Then<Unit>(u => u.SetController(Player1))
+			   .Spawn("Zombie")
+			   .At(4, 4)
+			   .In(Global.Instance)
+			   .Then<Unit>(u => u.SetController(Player1))
+			   .Spawn("Pupil")
+			   .At(22, 14)
+			   .In(Global.Instance)
+			   .Then<Unit>(u => u.SetController(Player2));
+	}
+
 	private async void OnPlayer1FinishedTurn()
 	{
 		await Global.WaitFor(2);
