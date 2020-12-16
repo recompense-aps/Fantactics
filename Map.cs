@@ -18,8 +18,6 @@ public class Map : Node2D
         environmentMap = GetNode<TileMap>("EnvironmentMap");
         highlightMap = GetNode<TileMap>("HighlightMap");
         debugLabel = GetNode<Label>("Debug/DebugText");
-        Global.Bus.Emit(nameof(MapChanged), this)
-                  .On(nameof(LookingForMap), this, nameof(OnLookingForMap));
         Global.ActiveMap = this; // TODO decouple this
     }
 
@@ -173,7 +171,6 @@ public class Map : Node2D
 
     private void OnLookingForMap()
     {
-        Global.Bus.Emit(nameof(MapChanged), this);
     }
 
     private void _on_Map_tree_exiting()

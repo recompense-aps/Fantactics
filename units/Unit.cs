@@ -67,25 +67,13 @@ public class Unit : Area2D
 
     public static Unit SpawnWithUnitName(string unitName, Vector2 worldPosition)
     {
-        Unit unit = null;
-        switch(unitName)
+        Unit unit = Spawner.Spawn<Unit>(unitName);
+        if(unit == null)
         {
-            case nameof(Zombie):
-                unit = Zombie.Scene.Instance();
-                break;
-            case nameof(Pupil):
-                unit = Pupil.Scene.Instance();
-                break;
-            default:
-                throw Global.Error(string.Format("Cannot spawn unit type '{0}' it is not a valid unit type", unitName));
+             throw Global.Error(string.Format("Cannot spawn unit type '{0}' it is not a valid unit type", unitName));
         }
 
-        if(unit != null)
-        {
-            return Spawn(unit, worldPosition);
-        }
-
-        return unit;
+        return Spawn(unit, worldPosition);
     }
 
     public static Unit SpawnAt(string unitName, Vector2 boardPosition)

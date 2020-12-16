@@ -1,6 +1,7 @@
 using Godot;
 using System;
 
+[Spawnable]
 public class Abaddon : Unit
 {
     public override void _Ready()

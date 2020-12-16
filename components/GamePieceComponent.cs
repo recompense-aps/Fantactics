@@ -23,7 +23,6 @@ public class GamePieceComponent : Node
         }
 
         slave = parent;
-        Global.Bus.On(nameof(Map.MapChanged), this, nameof(OnMapChanged));
     }
 
     public void SnapToGrid()

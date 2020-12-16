@@ -16,6 +16,11 @@ public class Global : Node
     {
         GD.Print(message);
     }
+
+    public static void Log(string tag, object message)
+    {
+        Log("[" + tag + "]" + "\t" + message.ToString());
+    }
 	
     public static Exception Error(object message)
     {
@@ -35,6 +40,7 @@ public class Global : Node
 
     public override void _Ready()
     {
+        Spawner.Initialize();
         Instance = this;
         UnitActionDialogue = GetNode<UnitActionDialogue>("UnitActionDialogue");
         TurnStartScreen = GetNode<TurnStartScreen>("TurnStartScreen");

@@ -70,6 +70,6 @@ public class Controller : Node
 
 	private string GenerateGuid()
 	{
-		return Guid.NewGuid().ToString();
+		return System.Guid.NewGuid().ToString();
 	}
 }
