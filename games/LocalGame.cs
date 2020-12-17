@@ -18,36 +18,8 @@ public class LocalGame : Game
 		Global.Instance.AddChild(Player1);
 		Global.Instance.AddChild(Player2);
 
-		List<SpawnGroup> player1Units = new List<SpawnGroup>()
-		{
-			new SpawnGroup()
-			{
-				UnitType = nameof(Zombie),
-				BoardPosition = new Vector2(2,2)
-			},
-			new SpawnGroup()
-			{
-				UnitType = nameof(Zombie),
-				BoardPosition = new Vector2(4,4)
-			}
-		};
-
-		List<SpawnGroup> player2Units = new List<SpawnGroup>()
-		{
-			new SpawnGroup()
-			{
-				UnitType = nameof(Pupil),
-				BoardPosition = new Vector2(22,14)
-			}
-		};
-
-		player1Units.ForEach(group => group.Spawn(Player1));
-		player2Units.ForEach(group => group.Spawn(Player2));
-
-		Building pit = Building.SpawnAt(nameof(Pit), new Vector2(1,1));
-		pit.Controller = Player1;
-		Building uni = Building.SpawnAt(nameof(University), new Vector2(23, 15));
-		uni.Controller = Player2;
+		SetUpUnits();
+		SetUpBuildings();
 
 		Player1.StartTurn();
 	}
@@ -67,6 +39,20 @@ public class LocalGame : Game
 			   .At(22, 14)
 			   .In(Global.Instance)
 			   .Then<Unit>(u => u.SetController(Player2));
+	}
+
+	private void SetUpBuildings()
+	{
+		Spawner.WithBoard(new object());
+		Spawner.Spawn("Pit")
+			   .At(1, 1)
+			   .In(Global.Instance)
+			   .Then<Building>(b => b.Controller = Player1)
+			   .Spawn("University")
+			   .At(23, 15)
+			   .In(Global.Instance)
+			   .Then<Building>(b => b.Controller = Player2);
+
 	}
 
 	private async void OnPlayer1FinishedTurn()
