@@ -4,13 +4,13 @@ using System;
 public class UnitActionDialogue : Node2D
 {
     [Signal]
-    public delegate void SelectedCancel(GameTile actionedTile);
+    public delegate void SelectedCancel(GameBoardCell actionedTile);
     [Signal]
-    public delegate void SelectedWait(GameTile actionedTile);
+    public delegate void SelectedWait(GameBoardCell actionedTile);
     [Signal]
-    public delegate void SelectedAttack(GameTile actionedTile);
+    public delegate void SelectedAttack(GameBoardCell actionedTile);
     public bool IsOpen{get; private set;}
-    private GameTile actionedTile;
+    private GameBoardCell actionedTile;
     private Button waitButton;
     private Button attackButton;
     private Button cancelButton;
@@ -40,19 +40,19 @@ public class UnitActionDialogue : Node2D
     public void OpenAtMouse(Unit unit)
     {
         Position = GetTree().Root.GetMousePosition();
-        actionedTile = Global.ActiveMap.GetTileAt(Global.ActiveMap.GetBoardPositionFromWorldPosition(Position));
+        actionedTile = Global.ActiveMap.Board.CellAtWorldPosition(Position);
         Open(unit);
     }
 
     private bool ShouldShowWaitButton(Unit unit)
     {
-        return unit.CanMoveTo(actionedTile.BoardPosition) && !actionedTile.HasUnit;
+        return unit.CanMoveTo(actionedTile) && !actionedTile.HasUnit;
     }
 
     private bool ShouldShowAttackButton(Unit unit)
     {
         return actionedTile.HasUnit && 
-               actionedTile.IsWithin(unit.GameBoardPosition, unit.Speed + unit.AttackRange) &&
+               actionedTile.IsWithin(unit.Cell, unit.Speed + unit.AttackRange) &&
                actionedTile.Unit.HasSameController(unit) == false;
     }
 

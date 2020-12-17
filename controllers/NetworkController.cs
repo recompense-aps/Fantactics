@@ -42,27 +42,27 @@ public class NetworkController : Controller
 
     private async void SpawnUnit()
     {
-        Vector2 pos = GetTree().Root.GetMousePosition();
+        // Vector2 pos = GetTree().Root.GetMousePosition();
 
-        // don't spawn if a unit is already there
-        Vector2 gameBoardPosition = Global.ActiveMap.GetBoardPositionFromWorldPosition(pos);
-        if(Global.ActiveMap.CellHasUnit(gameBoardPosition)) return;
+        // // don't spawn if a unit is already there
+        // Vector2 gameBoardPosition = Global.ActiveMap.GetBoardPositionFromWorldPosition(pos);
+        // if(Global.ActiveMap.CellHasUnit(gameBoardPosition)) return;
 
-        Zombie z = Zombie.Scene.Instance();
-        z.SetController(this);
+        // Zombie z = Zombie.Scene.Instance();
+        // z.SetController(this);
 
-        Unit.Spawn(z, pos);
+        // Unit.Spawn(z, pos);
 
-        await ToSignal(z, nameof(Unit.FinishedSpawning));
+        // await ToSignal(z, nameof(Unit.FinishedSpawning));
 
-        if(HasInitiative)
-        {
-            z.State.Change<BasicIdleOnTurnState>();
-        }
-        else
-        {
-            z.State.Change<BasicIdleState>();
-        }
+        // if(HasInitiative)
+        // {
+        //     z.State.Change<BasicIdleOnTurnState>();
+        // }
+        // else
+        // {
+        //     z.State.Change<BasicIdleState>();
+        // }
     }
 }
 

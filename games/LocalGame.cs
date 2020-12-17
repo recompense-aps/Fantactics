@@ -26,7 +26,7 @@ public class LocalGame : Game
 
 	private void SetUpUnits()
 	{
-		Spawner.WithBoard(new object());
+		Spawner.WithBoardPositions();
 		Spawner.Spawn("Zombie")
 			   .At(2, 2)
 			   .In(Global.Instance)
@@ -43,7 +43,7 @@ public class LocalGame : Game
 
 	private void SetUpBuildings()
 	{
-		Spawner.WithBoard(new object());
+		Spawner.WithBoardPositions();
 		Spawner.Spawn("Pit")
 			   .At(1, 1)
 			   .In(Global.Instance)
@@ -66,16 +66,4 @@ public class LocalGame : Game
 		await Global.WaitFor(2);
 		Player1.StartTurn();
 	}
-}
-class SpawnGroup
-{
-	public string UnitType {get; set;}
-	public Vector2 BoardPosition{get; set;}
-
-	public void Spawn(Controller c)
-	{
-		Unit u = Unit.SpawnAt(UnitType, BoardPosition);
-		u.SetController(c);
-	}
-
 }

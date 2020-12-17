@@ -175,7 +175,11 @@ public class SpawnAction : UnitAction
     {
         // little different, need to create the unit
         // when it gets created, spawn action happens
-        Unit unit = Unit.SpawnWithUnitName(UnitType, SpawnWorldPosition);
+        Spawner.WithGlobalPositions();
+        Unit unit = Spawner.Spawn(UnitType)
+                           .At(SpawnWorldPosition)
+                           .In(Global.Instance)
+                           .As<Unit>();
 
         unit.Guid = UnitGuid;
 

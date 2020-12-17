@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public static class Spawner
 {
     private static Dictionary<string, PackedScene> scenes = new Dictionary<string, PackedScene>();
+    public static bool UseGlobalPositions {get; private set;} = true;
     public static void Initialize()
     {
         Global.Log("Spawner", "Initializing...");
@@ -37,8 +38,14 @@ public static class Spawner
         Global.Log("Spawner", "Initialization complete");
     }
 
-    public static void WithBoard(object board)
+    public static void WithBoardPositions()
     {
+        UseGlobalPositions = false;
+    }
+
+    public static void WithGlobalPositions()
+    {
+        UseGlobalPositions = true;
     }
 
     public static T Spawn<T>(string id) where T:Node
@@ -85,6 +92,10 @@ public class SpawnResult
     {
         if(Node is Node2D)
         {
+            if(!Spawner.UseGlobalPositions)
+            {
+                position = Global.ActiveMap.Board.CellAt(position).WorldPosition;
+            }
             (Node as Node2D).Position = new Vector2(position);
         }
         else

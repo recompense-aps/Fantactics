@@ -2,7 +2,7 @@ using Godot;
 using System.Linq;
 using System.Collections.Generic;
 
-public class Unit : Area2D
+public class Unit : GamePiece
 {
     [Signal]
     public delegate void TurnStarted();
@@ -33,7 +33,6 @@ public class Unit : Area2D
 
     public string Guid{get; set;}
     public Controller UnitController{get; set;}
-    public GameTile GameBoardPosition{get; private set;}
     public StateManager<Unit> State {get; private set;}
     private HpDisplay hpDisplay;
     private ColorTag colorTag;
@@ -58,30 +57,6 @@ public class Unit : Area2D
         return All.Where(unit => unit.Guid == guid).FirstOrDefault();
     }
 
-    public static Unit Spawn(Unit unit, Vector2 worldPosition)
-    {
-        unit.GlobalPosition = worldPosition;
-        Global.Instance.AddChild(unit);
-        return unit;
-    }
-
-    public static Unit SpawnWithUnitName(string unitName, Vector2 worldPosition)
-    {
-        Unit unit = Spawner.Spawn<Unit>(unitName);
-        if(unit == null)
-        {
-             throw Global.Error(string.Format("Cannot spawn unit type '{0}' it is not a valid unit type", unitName));
-        }
-
-        return Spawn(unit, worldPosition);
-    }
-
-    public static Unit SpawnAt(string unitName, Vector2 boardPosition)
-    {
-        Vector2 worldPosition = Global.ActiveMap.GetWorldPositionFromCell(boardPosition);
-        return SpawnWithUnitName(unitName, worldPosition);
-    }
-
     ///////////////////////////////////////////////////////////////////
     //   Overridden Godot callbacks
     ////////////////////////////////////////////////////////////////////
@@ -98,12 +73,6 @@ public class Unit : Area2D
         SetStats();
         SetAbilities();
 
-        if(GameBoardPosition == null)
-        {
-            Vector2 v = Global.ActiveMap.GetBoardPositionFromWorldPosition(Position);
-            SetGamePosition(v);
-        }
-
         hpDisplay.SetValue(Hp);
         AddToGroup("units");
 
@@ -114,12 +83,6 @@ public class Unit : Area2D
     ///////////////////////////////////////////////////////////////////
     //   Public non-virtual methods
     ////////////////////////////////////////////////////////////////////
-    public void SetGamePosition(Vector2 position)
-    {
-        Position = Global.ActiveMap.GetWorldPositionFromCell(position);
-        GameBoardPosition = Global.ActiveMap.GetTileAt(position);
-    }
-
     public void SetController(Controller controller)
     {
         UnitController = controller;
@@ -174,7 +137,6 @@ public class Unit : Area2D
         t2.InterpolateProperty(this, "position", new Vector2(point.x, Position.y), new Vector2(point.x, point.y), 0.25f, Tween.TransitionType.Linear, Tween.EaseType.InOut, 0.26f);
         t.Start();
         t2.Start();
-        GameBoardPosition = Global.ActiveMap.GetTileAt(Global.ActiveMap.GetBoardPositionFromWorldPosition(point));
         await ToSignal(t2, "tween_completed");
         EmitSignal(nameof(FinishedMoving));
         RecordAction(new MoveAction(this, point));
@@ -252,9 +214,9 @@ public class Unit : Area2D
     ////////////////////////////////////////////////////////////////////
     //  Other public virtual methods
     ////////////////////////////////////////////////////////////////////
-    public virtual bool CanMoveTo(Vector2 gameBoardPosition)
+    public virtual bool CanMoveTo(GameBoardCell cell)
     {
-        return gameBoardPosition.BoardDistance(GameBoardPosition.BoardPosition) <= Speed;
+        return cell.Position.BoardDistance(Cell.Position) <= Speed;
     }
 
     public virtual SignalAwaiter ApplyCombatEffect(Unit otherUnit)

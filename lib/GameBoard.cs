@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Linq;
+using System.Collections.Generic;
 
 public class GameBoard
 {
@@ -27,6 +29,41 @@ public class GameBoard
 	{
 		return CellAt((int)position.x, (int)position.y);
 	}
+
+    public GameBoardCell CellAtWorldPosition(Vector2 position)
+    {
+        return CellAt(map.Tilemaps.Environment.WorldToMap(position));
+    }
+
+    public List<GameBoardCell> GetCellsAround(GameBoardCell cell, int distance)
+    {
+        List<GameBoardCell> tiles = new List<GameBoardCell>();
+        List<Vector2> tranforms = new List<Vector2>(){ new Vector2(1,1), new Vector2(-1,1), new Vector2(1,-1), new Vector2(-1,-1) };
+        for(int x = 0; x <= distance; x++)
+        {
+            for(int y = 0; y <= distance && x + y <= distance; y++)
+            {
+                if(x == 0 && y == 0) continue;
+                tranforms.ForEach(v => 
+                {
+                    Vector2 position = cell.Position + ( new Vector2(x,y) * v );
+                    tiles.Add(CellAt(position));
+                });
+            }
+        }
+
+
+        return tiles;
+    }
+
+    public IEnumerable<Unit> GetUnitsInArea(Vector2 gameBoardPosition, int distance)
+    {
+        return 
+            from    unit in Unit.All
+            where   unit.Cell.Position.BoardDistance(gameBoardPosition) <= distance &&
+                    unit.Cell.Position != gameBoardPosition
+            select  unit;
+    }
 }
 
 public class GameBoardCell
@@ -36,6 +73,7 @@ public class GameBoardCell
     public Vector2 WorldPosition {get; private set;}
 	public string TileName {get; private set;}
 	public int TileIndex {get; private set;}
+    private Vector2 halfCell = new Vector2(32,32);
     
 	public bool HasUnit
     {
@@ -61,8 +99,9 @@ public class GameBoardCell
     
     public GameBoardCell(int x, int y, Map currentMap)
     {
+        Map = currentMap;
         Position = new Vector2(x,y);
-		Map = currentMap;
+        WorldPosition = Map.Tilemaps.Environment.MapToWorld(Position) + halfCell;
 		ExtractMetaData();
     }
 
@@ -86,7 +125,7 @@ public class GameBoardCell
 
 	private void ExtractMetaData()
 	{
-		// TileIndex = Map.TileMaps.Environment.GetCell((int)Position.x, (int)Position.y);
-        // TileName = Map.TileSets.Environment.TileGetName(TileIndex);
+		TileIndex = Map.Tilemaps.Environment.GetCell((int)Position.x, (int)Position.y);
+        TileName = Map.Tilesets.Environment.TileGetName(TileIndex);
 	}
 }
