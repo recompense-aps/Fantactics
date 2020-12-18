@@ -4,7 +4,6 @@ using System;
 [Spawnable]
 public class Pupil : Unit
 {
-    public static SceneWrapper<Pupil> Scene = new SceneWrapper<Pupil>("res://units/wizards/Pupil.tscn");
     public override void _Ready()
     {
         base._Ready();
