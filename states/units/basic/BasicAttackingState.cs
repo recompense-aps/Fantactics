@@ -3,25 +3,25 @@ using System.Linq;
 
 public class BasicAttackingState : State<Unit>
 {
-    private GameTile tileToAttack;
+    private GameBoardCell tileToAttack;
 
     protected override void OnStateStarted()
     {
         base.OnStateStarted();
         
         // state that we need
-        tileToAttack = Manager.Data<GameTile>("tileToAttack");
+        tileToAttack = Manager.Data<GameBoardCell>("tileToAttack");
 
-        GameTile tileToMoveTo = Global.ActiveMap.GetTilesAt(tileToAttack.BoardPosition, 1)
-                        .Where(v => Slave.CanMoveTo(v.BoardPosition) && Global.ActiveMap.GetUnitAt(v.BoardPosition) == null)
+        GameBoardCell tileToMoveTo = Global.ActiveMap.Board.GetCellsAround(tileToAttack, 1)
+                        .Where(v => Slave.CanMoveTo(v) && v.HasUnit == false)
                         .First();
         Attack(tileToMoveTo);
     }
 
-    private async void Attack(GameTile attackPositionTile)
+    private async void Attack(GameBoardCell attackPositionTile)
     {
         // first, move into position
-        if(tileToAttack.BoardPosition.BoardDistance(Slave.GameBoardPosition.BoardPosition) > Slave.AttackRange)
+        if(tileToAttack.Position.BoardDistance(Slave.Cell.Position) > Slave.AttackRange)
         {
             Slave.MoveToAction(attackPositionTile.WorldPosition);
 
@@ -30,7 +30,7 @@ public class BasicAttackingState : State<Unit>
         }
 
         // then, do the combat
-        Unit otherUnit = Global.ActiveMap.GetUnitAt(tileToAttack.BoardPosition);
+        Unit otherUnit = tileToAttack.Unit;
         Slave.FightAction(otherUnit);
 
         // wait for the combat to finish

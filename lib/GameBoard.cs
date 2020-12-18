@@ -75,27 +75,9 @@ public class GameBoardCell
 	public int TileIndex {get; private set;}
     private Vector2 halfCell = new Vector2(32,32);
     
-	public bool HasUnit
-    {
-        get
-        {
-            return Map.CellHasUnit(Position);
-        }
-    }
-    public Unit Unit
-    {
-        get
-        {
-            if(HasUnit)
-            {
-                return Map.GetUnitAt(Position);
-            }
-            else
-            {
-                return null;
-            }
-        }
-    }
+	public bool HasUnit => Unit != null;
+
+    public Unit Unit => Unit.All.Where(unit => unit.Cell.Position == Position).FirstOrDefault();
     
     public GameBoardCell(int x, int y, Map currentMap)
     {

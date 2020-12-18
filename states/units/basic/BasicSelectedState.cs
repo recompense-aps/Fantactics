@@ -9,9 +9,9 @@ public class BasicSelectedState : State<Unit>
         base.OnStateStarted();
 
         Global.ActiveMap.HighlightTiles(Slave.Position, Slave.Speed, CellHighlight.Green);
-        Global.ActiveMap.GetUnitsInArea(Slave.GameBoardPosition.BoardPosition, Slave.Speed + Slave.AttackRange)
+        Global.ActiveMap.Board.GetUnitsInArea(Slave.Cell.Position, Slave.Speed + Slave.AttackRange)
               .ToList()
-              .ForEach(unit => Global.ActiveMap.HighlightTile(unit.GameBoardPosition.BoardPosition, CellHighlight.Red));
+              .ForEach(unit => Global.ActiveMap.HighlightTile(unit.Cell.Position, CellHighlight.Red));
         Global.UnitActionDialogue.Connect(nameof(UnitActionDialogue.SelectedCancel), this, nameof(OnSelectedCancel));
         Global.UnitActionDialogue.Connect(nameof(UnitActionDialogue.SelectedWait), this, nameof(OnSelectedWait));
         Global.UnitActionDialogue.Connect(nameof(UnitActionDialogue.SelectedAttack), this, nameof(OnSelectedAttack));
@@ -46,27 +46,27 @@ public class BasicSelectedState : State<Unit>
         Manager.Change<BasicFinishedTurnState>();
     }
 
-    private void Attack(GameTile actionedTile)
+    private void Attack(GameBoardCell actionedTile)
     {
-        Manager.Mutate("tileToAttack", actionedTile);
-        Manager.Change<BasicAttackingState>();
+        // Manager.Mutate("tileToAttack", actionedTile);
+        // Manager.Change<BasicAttackingState>();
     }
 
-    private void OnSelectedCancel(GameTile actionedTile)
+    private void OnSelectedCancel(GameBoardCell actionedTile)
     {
-        UnHighlightCells();
-        Unit.All.ForEach(unit => unit.State.Revert());
+        // UnHighlightCells();
+        // Unit.All.ForEach(unit => unit.State.Revert());
     }
-    private void OnSelectedWait(GameTile actionedTile)
+    private void OnSelectedWait(GameBoardCell actionedTile)
     {
         // move here
-        UnHighlightCells();
-        MoveUnit(actionedTile.WorldPosition);
+        // UnHighlightCells();
+        // MoveUnit(actionedTile.WorldPosition);
     }
-    private void OnSelectedAttack(GameTile actionedTile)
+    private void OnSelectedAttack(GameBoardCell actionedTile)
     {
         // move and attack
-        UnHighlightCells();
-        Attack(actionedTile);
+        // UnHighlightCells();
+        // Attack(actionedTile);
     }
 }
