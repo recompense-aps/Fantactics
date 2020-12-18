@@ -66,7 +66,7 @@ public class GameBoard
     }
 }
 
-public class GameBoardCell
+public class GameBoardCell : Godot.Object
 {
     public Map Map{get; private set;}
     public Vector2 Position {get; private set;}

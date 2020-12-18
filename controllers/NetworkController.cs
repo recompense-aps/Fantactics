@@ -40,8 +40,9 @@ public class NetworkController : Controller
         }
     }
 
-    private async void SpawnUnit()
+    private void SpawnUnit()
     {
+
         // Vector2 pos = GetTree().Root.GetMousePosition();
 
         // // don't spawn if a unit is already there

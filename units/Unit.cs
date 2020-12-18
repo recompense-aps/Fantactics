@@ -87,7 +87,7 @@ public class Unit : GamePiece
     {
         UnitController = controller;
         Guid = controller.Guid + "|" + GetInstanceId();
-        colorTag.SetColor(controller.Color);
+        //colorTag.SetColor(controller.Color);
     }
 
     public bool HasSameController(Unit otherUnit)
