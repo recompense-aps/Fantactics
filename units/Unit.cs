@@ -62,6 +62,7 @@ public class Unit : GamePiece
     ////////////////////////////////////////////////////////////////////
     public override void _Ready()
     {
+        base._Ready();
         Guid = Guid ?? GetInstanceId().ToString();
         State = new StateManager<Unit>();
         hpDisplay = HpDisplay.Scene.Instance();
@@ -69,7 +70,6 @@ public class Unit : GamePiece
         AddChild(State);
         AddChild(hpDisplay);
         AddChild(colorTag);
-        Connect("input_event", this, nameof(OnInputEvent));
         SetStats();
         SetAbilities();
 
@@ -266,21 +266,4 @@ public class Unit : GamePiece
     protected virtual void SetStats(){}
 
     protected virtual void SetAbilities(){}
-
-    private void OnInputEvent(Node viewport, InputEvent inputEvent, int shape)
-    {
-        if(inputEvent is InputEventMouseButton)
-        {
-            InputEventMouseButton mouseEvent = inputEvent as InputEventMouseButton;
-            if(mouseEvent.Pressed && mouseEvent.ButtonIndex == (int)ButtonList.Left)
-            {
-                wasPressed = true;
-            }
-            if(!mouseEvent.Pressed && mouseEvent.ButtonIndex == (int)ButtonList.Left)
-            {
-                wasPressed = false;
-                EmitSignal(nameof(Clicked));
-            }
-        }
-    }
 }

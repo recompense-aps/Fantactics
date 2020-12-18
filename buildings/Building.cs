@@ -1,18 +1,13 @@
 using Godot;
 using System;
 
-public class Building : Area2D
+public class Building : GamePiece
 {
     public Controller Controller {get; set;}
-    private ClickableComponent clickable;
 
     public override void _Ready()
     {
-        clickable = ClickableComponent.Scene.Instance();
-
-        AddChild(clickable);
-
-        clickable.Connect(nameof(ClickableComponent.Clicked), this, nameof(OnClick));
+        Connect(nameof(Clicked), this, nameof(OnClick));
     }
 
     ///////////////////////////////////
