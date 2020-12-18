@@ -210,7 +210,9 @@ public class Unit : GamePiece
     public virtual SignalAwaiter ApplyCombatEffect(Unit otherUnit)
     {
         // default filler thing
-        ExplosionEffect explosion = Scenes.Instance<ExplosionEffect>("Explosion");
+        // TODO: Some sort of fight effect
+        //ExplosionEffect explosion = Scenes.Instance<ExplosionEffect>("Explosion");
+        Node2D explosion = new Node2D();
         Global.Instance.AddChild(explosion);
         explosion.GlobalPosition = otherUnit.GlobalPosition;
 

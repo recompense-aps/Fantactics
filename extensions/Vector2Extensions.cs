@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public static class Extensions
+public static class Vector2Extensions
 {
     public static int BoardDistance(this Vector2 vector, Vector2 otherVector)
     {
