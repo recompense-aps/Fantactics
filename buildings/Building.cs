@@ -3,7 +3,6 @@ using System;
 
 public class Building : GamePiece
 {
-    public Controller Controller {get; set;}
 
     public override void _Ready()
     {

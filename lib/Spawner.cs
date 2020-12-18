@@ -82,9 +82,16 @@ public class SpawnResult
         Node = node;
     }
 
-    public SpawnResult In(Node parent)
+    public SpawnResult In(Node parent, bool deffered = false)
     {
-        parent.CallDeferred("add_child", Node);
+        if(deffered)
+        {
+            parent.CallDeferred("add_child", Node);
+        }
+        else
+        {
+            parent.AddChild(Node);
+        }
         return this;
     }
 

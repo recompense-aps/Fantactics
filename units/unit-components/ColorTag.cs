@@ -1,10 +1,9 @@
 using Godot;
 using System;
 
+[Spawnable]
 public class ColorTag : Node2D
 {
-    public static readonly SceneWrapper<ColorTag> Scene = new SceneWrapper<ColorTag>("res://units/unit-components/ColorTag.tscn");
-
     ColorRect colorRect;
     public override void _Ready()
     {

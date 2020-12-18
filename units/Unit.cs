@@ -58,11 +58,9 @@ public class Unit : GamePiece
     {
         base._Ready();
         State = new StateManager<Unit>();
-        hpDisplay = HpDisplay.Scene.Instance();
-        colorTag = ColorTag.Scene.Instance();
+        hpDisplay = Spawner.Spawn("HpDisplay").In(this).As<HpDisplay>();
+        colorTag = Spawner.Spawn("ColorTag").In(this).As<ColorTag>();
         AddChild(State);
-        AddChild(hpDisplay);
-        AddChild(colorTag);
         SetStats();
         SetAbilities();
 

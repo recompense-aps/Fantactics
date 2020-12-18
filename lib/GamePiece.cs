@@ -32,6 +32,7 @@ public class GamePiece : Area2D
     {
         Connect("input_event", this, nameof(OnInputEvent));
         Guid = Guid ?? GetInstanceId().ToString();
+        Board = Global.ActiveMap.Board;
     }
 
     public bool HasSameController(GamePiece otherPiece)

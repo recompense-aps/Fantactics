@@ -64,7 +64,7 @@ public class Map : Node2D
                 if(x == 0 && y == 0) continue;
 
                 Tilemaps.Highlights.SetCell((int)origin.x + x, (int)origin.y + y, (int)highlight);
-                Tilemaps.Environment.SetCell((int)origin.x - x, (int)origin.y + y, (int)highlight);
+                Tilemaps.Highlights.SetCell((int)origin.x - x, (int)origin.y + y, (int)highlight);
                 Tilemaps.Highlights.SetCell((int)origin.x + x, (int)origin.y - y, (int)highlight);
                 Tilemaps.Highlights.SetCell((int)origin.x - x, (int)origin.y - y, (int)highlight);
             }

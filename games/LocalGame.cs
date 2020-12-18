@@ -21,6 +21,8 @@ public class LocalGame : Game
 		SetUpUnits();
 		SetUpBuildings();
 
+		Global.Log("checking", Unit.All.Count);
+
 		Player1.StartTurn();
 	}
 
@@ -36,7 +38,7 @@ public class LocalGame : Game
 			   .In(Global.Instance)
 			   .Then<Unit>(u => u.Controller = Player1)
 			   .Spawn("Pupil")
-			   .At(22, 14)
+			   .At(21, 2)
 			   .In(Global.Instance)
 			   .Then<Unit>(u => u.Controller = Player2);
 	}
@@ -49,7 +51,7 @@ public class LocalGame : Game
 			   .In(Global.Instance)
 			   .Then<Building>(b => b.Controller = Player1)
 			   .Spawn("University")
-			   .At(23, 15)
+			   .At(23, 1)
 			   .In(Global.Instance)
 			   .Then<Building>(b => b.Controller = Player2);
 
