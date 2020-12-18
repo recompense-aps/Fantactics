@@ -54,14 +54,14 @@ public class BasicSelectedState : State<Unit>
 
     private void OnSelectedCancel(GameBoardCell actionedTile)
     {
-        // UnHighlightCells();
-        // Unit.All.ForEach(unit => unit.State.Revert());
+        UnHighlightCells();
+        Unit.All.ForEach(unit => unit.State.Revert());
     }
     private void OnSelectedWait(GameBoardCell actionedTile)
     {
         // move here
-        // UnHighlightCells();
-        // MoveUnit(actionedTile.WorldPosition);
+        UnHighlightCells();
+        MoveUnit(actionedTile.WorldPosition);
     }
     private void OnSelectedAttack(GameBoardCell actionedTile)
     {

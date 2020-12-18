@@ -14,12 +14,9 @@ public class GameBoard
 
 	public GameBoardCell CellAt(int x, int y)
 	{
-		string error;
-
 		if(x < 0 || y < 0)
 		{
-			error = string.Format("Invalid cell position [{0},{1}]. Arguments must be >= 0");
-			throw Global.Error(error);
+			return null;
 		}
 
 		return new GameBoardCell(x, y, map);
@@ -32,7 +29,7 @@ public class GameBoard
 
     public GameBoardCell CellAtWorldPosition(Vector2 position)
     {
-        return CellAt(map.Tilemaps.Environment.WorldToMap(position));
+        return CellAt(map.Tilemaps.Environment.WorldToMap(position - map.Tilemaps.Environment.Position));
     }
 
     public List<GameBoardCell> GetCellsAround(GameBoardCell cell, int distance)
@@ -74,16 +71,16 @@ public class GameBoardCell : Godot.Object
 	public string TileName {get; private set;}
 	public int TileIndex {get; private set;}
     private Vector2 halfCell = new Vector2(32,32);
-    
 	public bool HasUnit => Unit != null;
-
+    public bool IsEmpty => GamePiece != null;
     public Unit Unit => Unit.All.Where(unit => unit.Cell.Position == Position).FirstOrDefault();
+    public GamePiece GamePiece => GamePiece.All.Where(piece => piece.Cell.Position == Position).FirstOrDefault();
     
     public GameBoardCell(int x, int y, Map currentMap)
     {
         Map = currentMap;
         Position = new Vector2(x,y);
-        WorldPosition = Map.Tilemaps.Environment.MapToWorld(Position) + halfCell;
+        WorldPosition = Map.Tilemaps.Environment.MapToWorld(Position) + halfCell + Map.Tilemaps.Environment.Position;
 		ExtractMetaData();
     }
 
@@ -108,6 +105,9 @@ public class GameBoardCell : Godot.Object
 	private void ExtractMetaData()
 	{
 		TileIndex = Map.Tilemaps.Environment.GetCell((int)Position.x, (int)Position.y);
-        TileName = Map.Tilesets.Environment.TileGetName(TileIndex);
+        if(TileIndex != -1)
+        {
+            TileName = Map.Tilesets.Environment.TileGetName(TileIndex);
+        }
 	}
 }

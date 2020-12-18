@@ -1,5 +1,6 @@
 using Godot;
-using System;
+using System.Linq;
+using System.Collections.Generic;
 
 public class GamePiece : Area2D
 {
@@ -7,6 +8,8 @@ public class GamePiece : Area2D
     public delegate void Clicked();
     [Signal]
     public delegate void ControllerChanged(Controller newController);
+
+    public static List<GamePiece> All => Global.Instance.GetTree().GetNodesInGroup("game_pieces").Cast<GamePiece>().ToList();
 
     public GameBoard Board {get; private set;}
     public string Guid {get; set;}
@@ -33,6 +36,7 @@ public class GamePiece : Area2D
         Connect("input_event", this, nameof(OnInputEvent));
         Guid = Guid ?? GetInstanceId().ToString();
         Board = Global.ActiveMap.Board;
+        AddToGroup("game_pieces");
     }
 
     public bool HasSameController(GamePiece otherPiece)

@@ -38,7 +38,7 @@ public class Map : Node2D
         Vector2 mouse = GetTree().Root.GetMousePosition();
         GameBoardCell active = Board.CellAtWorldPosition(mouse);
 
-        if(active.TileIndex != -1)
+        if(active != null && active.TileIndex != -1)
         {
             debugLabel.Text = string.Format(@"
                 Mouse at:   {0}
@@ -56,7 +56,7 @@ public class Map : Node2D
 
     public void HighlightTiles(Vector2 origin, int distance, CellHighlight highlight)
     {
-        origin = Tilemaps.Environment.WorldToMap(origin);
+        origin = Tilemaps.Environment.WorldToMap(origin - Tilemaps.Environment.Position);
         for(int x = 0; x <= distance; x++)
         {
             for(int y = 0; y <= distance && x + y <= distance; y++)

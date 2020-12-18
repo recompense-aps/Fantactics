@@ -51,7 +51,7 @@ public class LocalGame : Game
 			   .In(Global.Instance)
 			   .Then<Building>(b => b.Controller = Player1)
 			   .Spawn("University")
-			   .At(23, 1)
+			   .At(21, 1)
 			   .In(Global.Instance)
 			   .Then<Building>(b => b.Controller = Player2);
 
