@@ -20,7 +20,7 @@ public class Controller : Node
         get
         {
             return Unit.All
-                       .Where(unit => unit.UnitController == this)
+                       .Where(unit => unit.Controller == this)
                        .ToList();
         }
     }

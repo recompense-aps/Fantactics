@@ -30,15 +30,15 @@ public class LocalGame : Game
 		Spawner.Spawn("Zombie")
 			   .At(2, 2)
 			   .In(Global.Instance)
-			   .Then<Unit>(u => u.SetController(Player1))
+			   .Then<Unit>(u => u.Controller = Player1)
 			   .Spawn("Zombie")
 			   .At(4, 4)
 			   .In(Global.Instance)
-			   .Then<Unit>(u => u.SetController(Player1))
+			   .Then<Unit>(u => u.Controller = Player1)
 			   .Spawn("Pupil")
 			   .At(22, 14)
 			   .In(Global.Instance)
-			   .Then<Unit>(u => u.SetController(Player2));
+			   .Then<Unit>(u => u.Controller = Player2);
 	}
 
 	private void SetUpBuildings()

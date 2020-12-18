@@ -7,8 +7,6 @@ public class Unit : GamePiece
     [Signal]
     public delegate void TurnStarted();
     [Signal]
-    public delegate void Clicked();
-    [Signal]
     public delegate void StartedMoving();
     [Signal]
     public delegate void FinishedMoving();
@@ -31,13 +29,9 @@ public class Unit : GamePiece
     public int Speed{get; protected set;}           = 4;
     public int AttackRange{get; protected set;}     = 1;
 
-    public string Guid{get; set;}
-    public Controller UnitController{get; set;}
     public StateManager<Unit> State {get; private set;}
     private HpDisplay hpDisplay;
     private ColorTag colorTag;
-    private Map map;
-    private bool wasPressed = false;
     public List<UnitAction> Actions {get; private set;} = new List<UnitAction>();
 
     ///////////////////////////////////////////////////////////////////
@@ -63,7 +57,6 @@ public class Unit : GamePiece
     public override void _Ready()
     {
         base._Ready();
-        Guid = Guid ?? GetInstanceId().ToString();
         State = new StateManager<Unit>();
         hpDisplay = HpDisplay.Scene.Instance();
         colorTag = ColorTag.Scene.Instance();
@@ -83,19 +76,6 @@ public class Unit : GamePiece
     ///////////////////////////////////////////////////////////////////
     //   Public non-virtual methods
     ////////////////////////////////////////////////////////////////////
-    public void SetController(Controller controller)
-    {
-        UnitController = controller;
-        Guid = controller.Guid + "|" + GetInstanceId();
-        //colorTag.SetColor(controller.Color);
-    }
-
-    public bool HasSameController(Unit otherUnit)
-    {
-        return UnitController == null ||                    // Just for prototype testing
-               otherUnit.UnitController == UnitController;
-    }
-
     public void RecordAction(UnitAction action)
     {
         Actions.Add(action);
