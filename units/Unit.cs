@@ -38,7 +38,7 @@ public class Unit : GamePiece
     //   Static utility methods
     ////////////////////////////////////////////////////////////////////
 
-    public static List<Unit> All
+    public new static List<Unit> All
     {
         get
         {
@@ -192,6 +192,16 @@ public class Unit : GamePiece
     ////////////////////////////////////////////////////////////////////
     //  Other public virtual methods
     ////////////////////////////////////////////////////////////////////
+    public virtual List<GameBoardCell> GetPossibleMovementCells()
+    {
+        return Global.ActiveMap.Board.GetCellsAround(Cell, Speed);
+    }
+    
+    public virtual int ComputeMovementCost(GameBoardCell cell)
+    {
+        return Cell.Position.BoardDistance(cell.Position) + cell.MovementCost;
+    }
+
     public virtual bool CanMoveTo(GameBoardCell cell)
     {
         return cell.Position.BoardDistance(Cell.Position) <= Speed;

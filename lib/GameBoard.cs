@@ -65,6 +65,7 @@ public class GameBoard
 
 public class GameBoardCell : Godot.Object
 {
+    private const int INFINITE_COST = 1000;
     public Map Map{get; private set;}
     public Vector2 Position {get; private set;}
     public Vector2 WorldPosition {get; private set;}
@@ -74,6 +75,7 @@ public class GameBoardCell : Godot.Object
 	public bool HasUnit => Unit != null;
     public bool IsEmpty => GamePiece != null;
     public Unit Unit => Unit.All.Where(unit => unit.Cell.Position == Position).FirstOrDefault();
+    public int MovementCost => IsEmpty ? 1 : INFINITE_COST; // TODO: refactor for terrain
     public GamePiece GamePiece => GamePiece.All.Where(piece => piece.Cell.Position == Position).FirstOrDefault();
     
     public GameBoardCell(int x, int y, Map currentMap)
