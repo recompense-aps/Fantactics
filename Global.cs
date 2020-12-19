@@ -136,28 +136,3 @@ public class HttpResponse
         ", Url, Result, ResponseCode, string.Join(";\n\t\t", Headers), Body, string.Join(" ", RawResponse));
     }
 }
-
-public class EventBus
-{
-    public EventBus On(string signal, Godot.Object target, string methodName)
-    {
-        if(!Global.Instance.HasUserSignal(signal))
-        {
-            Global.Instance.AddUserSignal(signal);
-        }
-
-        Global.Instance.Connect(signal, target, methodName);
-
-        return this;
-    }
-
-    public EventBus Emit(string signal, params object[] args)
-    {
-        if(Global.Instance.HasUserSignal(signal))
-        {
-            Global.Instance.EmitSignal(signal, args);
-        }
-        
-        return this;
-    }
-}
