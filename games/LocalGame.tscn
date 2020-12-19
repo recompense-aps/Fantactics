@@ -2,7 +2,6 @@
 
 [ext_resource path="res://maps/Map.tscn" type="PackedScene" id=2]
 
-
 [sub_resource type="CSharpScript" id=1]
 script/source = "using Godot;
 using System.Collections.Generic;
