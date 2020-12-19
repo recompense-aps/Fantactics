@@ -8,6 +8,7 @@ public class Map : Node2D
     public MapTilemaps Tilemaps {get; private set;}
     public MapTilesets Tilesets {get; private set;}
     public GameBoard Board {get; private set;}
+    public PathFinder PathFinder {get; private set;}
     private Label debugLabel;
     private Vector2 halfCell = new Vector2(32,32);
     
@@ -24,8 +25,10 @@ public class Map : Node2D
             Highlights = Tilemaps.Highlights.TileSet
         };
         Board = new GameBoard(this);
+        PathFinder = new PathFinder();
         debugLabel = GetNode<Label>("Debug/DebugText");
         Global.ActiveMap = this; // TODO decouple this
+        AddChild(PathFinder);
     }
 
     public override void _Process(float delta)

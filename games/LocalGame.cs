@@ -24,6 +24,8 @@ public class LocalGame : Game
 		Global.Log("checking", Unit.All.Count);
 
 		Player1.StartTurn();
+
+		//Vector2[] path = Global.ActiveMap.PathFinder.FindPath(new Vector2(0,4), new Vector2(4,4), Global.ActiveMap.Board.GetCellsAround())
 	}
 
 	private void SetUpUnits()
