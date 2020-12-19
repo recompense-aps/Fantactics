@@ -74,7 +74,7 @@ public class Map : Node2D
         }
     }
 
-    public void HighlightTile(Vector2 gameBoardPosition, CellHighlight highlight)
+    public void HighlightCell(Vector2 gameBoardPosition, CellHighlight highlight)
     {
         Tilemaps.Highlights.SetCell((int)gameBoardPosition.x, (int)gameBoardPosition.y, (int)highlight);
     }

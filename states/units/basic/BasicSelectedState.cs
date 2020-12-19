@@ -11,7 +11,7 @@ public class BasicSelectedState : State<Unit>
         Global.ActiveMap.HighlightTiles(Slave.Position, Slave.Speed, CellHighlight.Green);
         Global.ActiveMap.Board.GetUnitsInArea(Slave.Cell.Position, Slave.Speed + Slave.AttackRange)
               .ToList()
-              .ForEach(unit => Global.ActiveMap.HighlightTile(unit.Cell.Position, CellHighlight.Red));
+              .ForEach(unit => Global.ActiveMap.HighlightCell(unit.Cell.Position, CellHighlight.Red));
         Global.UnitActionDialogue.Connect(nameof(UnitActionDialogue.SelectedCancel), this, nameof(OnSelectedCancel));
         Global.UnitActionDialogue.Connect(nameof(UnitActionDialogue.SelectedWait), this, nameof(OnSelectedWait));
         Global.UnitActionDialogue.Connect(nameof(UnitActionDialogue.SelectedAttack), this, nameof(OnSelectedAttack));

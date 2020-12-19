@@ -1,4 +1,5 @@
 using Godot;
+using System.Linq;
 using System.Collections.Generic;
 
 public class PathFinder : Node
@@ -47,13 +48,22 @@ public class PathFinder : Node
             leftIndex = up == null ? -1 : board.IndexOf(left);
             rightIndex = up == null ? -1 : board.IndexOf(right);
 
-            if(up != null) fstar.ConnectPoints(index,upIndex,false);
-            if(down != null) fstar.ConnectPoints(index,downIndex,false);
-            if(left != null) fstar.ConnectPoints(index,leftIndex,false);
-            if(right != null) fstar.ConnectPoints(index,rightIndex,false);
+            ConnectPoints(index, upIndex, fstar);
+            ConnectPoints(index, downIndex, fstar);
+            ConnectPoints(index, leftIndex, fstar);
+            ConnectPoints(index, rightIndex, fstar);
         });
 
-        return fstar.GetPointPath(fromIndex, toIndex);
+        Vector2[] results = fstar.GetPointPath(fromIndex, toIndex);
+        return results;
+    }
+
+    private void ConnectPoints(int fromId, int toId, FStar fstar)
+    {
+        if(fstar.HasPoint(toId) && !fstar.ArePointsConnected(fromId,toId)) 
+        {
+            fstar.ConnectPoints(fromId,toId);
+        }
     }
 
     private GameBoardCell GetCellFromMap(GameBoardCell[,] map, int x, int y)
@@ -70,11 +80,63 @@ public class FStar : AStar2D
 {
     public override float _ComputeCost(int fromId, int toId)
     {
-        return base._ComputeCost(fromId, toId);
+        return Mathf.Abs(fromId - toId);
     }
 
     public override float _EstimateCost(int fromId, int toId)
     {
-        return base._EstimateCost(fromId, toId);
+        return base._ComputeCost(fromId, toId);
+    }
+}
+
+public class BFS
+{
+    private Dictionary<string,Vector2> cameFrom = new Dictionary<string, Vector2>();
+    private Queue<GameBoardCell> frontier = new Queue<GameBoardCell>();
+    private Vector2 origin;
+    private GameBoard board;
+
+    public BFS(Vector2 startPoint, GameBoard gameBoard)
+    {
+        origin = startPoint;
+        board = gameBoard;
+    }
+
+    public void Search()
+    {
+        GameBoardCell startCell = board.CellAt(origin);
+        frontier.Enqueue(startCell);
+        cameFrom.Add(startCell.Position.ToString(), startCell.Position);
+
+        int iters = 0;
+
+        while(frontier.Count() > 0)
+        {
+            iters++;
+            GameBoardCell current = frontier.Dequeue();
+            current.Neighbors.ForEach(next => {
+
+                if(!cameFrom.ContainsKey(next.Position.ToString()))
+                {
+                    frontier.Enqueue(next);
+                    cameFrom.Add(next.Position.ToString(), current.Position);
+                }
+            });
+        }
+    }
+
+    public List<Vector2> PathTo(Vector2 destination)
+    {
+        List<Vector2> path = new List<Vector2>();
+        Vector2 goal = cameFrom.Values.Where(c => c == destination).FirstOrDefault();
+        Vector2 current = goal;
+
+        while(current != origin)
+        {
+            path.Add(current);
+            current = cameFrom[current.ToString()];
+        }
+        
+        return path;
     }
 }

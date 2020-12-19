@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class GameBoard
 {
+    public Vector2 Size {get;} = new Vector2(23,14);
 	private Map map;
 
 	public GameBoard(Map currentMap)
@@ -44,7 +45,15 @@ public class GameBoard
                 tranforms.ForEach(v => 
                 {
                     Vector2 position = cell.Position + ( new Vector2(x,y) * v );
-                    tiles.Add(CellAt(position));
+
+                    if(position.x >= 0 && position.y >= 0)
+                    {
+                        if(tiles.Where(c => c.Position == position).FirstOrDefault() == null)
+                        {
+                            tiles.Add(CellAt(position));
+                        }
+                    }
+                    
                 });
             }
         }
@@ -77,6 +86,7 @@ public class GameBoardCell : Godot.Object
     public Unit Unit => Unit.All.Where(unit => unit.Cell.Position == Position).FirstOrDefault();
     public int MovementCost => IsEmpty ? 1 : INFINITE_COST; // TODO: refactor for terrain
     public GamePiece GamePiece => GamePiece.All.Where(piece => piece.Cell.Position == Position).FirstOrDefault();
+    public List<GameBoardCell> Neighbors => GetNeighbors();
     
     public GameBoardCell(int x, int y, Map currentMap)
     {
@@ -112,4 +122,25 @@ public class GameBoardCell : Godot.Object
             TileName = Map.Tilesets.Environment.TileGetName(TileIndex);
         }
 	}
+
+    private List<GameBoardCell> GetNeighbors()
+    {
+        List<GameBoardCell> neighbors = new List<GameBoardCell>();
+        int nextX,nextY;
+        for(int i = -1; i < 2; i++)
+        {
+            for(int j = -1; j < 2; j++)
+            {
+                if( (i == 0 && j == 0) || ( Math.Abs(i) + Math.Abs(j) > 1 ) ) continue;
+                nextX = (int)Position.x + i;
+                nextY = (int)Position.y + j;
+                if(nextX > 0 && nextY > 0 && nextX <= Map.Board.Size.x && nextY <= Map.Board.Size.y)
+                {
+                    neighbors.Add(Map.Board.CellAt(nextX,nextY));
+                }
+            }
+        }
+
+        return neighbors;
+    }
 }
