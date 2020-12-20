@@ -89,6 +89,7 @@ public class FStar : AStar2D
     }
 }
 
+// Adapted from: https://www.redblobgames.com/pathfinding/a-star/introduction.html
 public class BFS
 {
     private Dictionary<string,Vector2> cameFrom = new Dictionary<string, Vector2>();
